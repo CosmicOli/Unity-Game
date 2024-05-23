@@ -7,7 +7,6 @@ using UnityEngine.InputSystem;
 public class PlayerBehaviour : MonoBehaviour
 {
     public Rigidbody2D rigidBody;
-    public LayerMask groundLayer;
 
     private float horizontal;
     public float runningPower;
@@ -15,6 +14,8 @@ public class PlayerBehaviour : MonoBehaviour
 
     private bool isFacingRight;
     private bool isGrounded = true;
+
+    public AttackBehaviour attackBehaviour;
 
     // Start is called before the first frame update
     void Start()
@@ -62,6 +63,8 @@ public class PlayerBehaviour : MonoBehaviour
         horizontal = context.ReadValue<Vector2>().x;
         // Note that this means only horizontal values are added
         // For keyboard controls, w and s could hence be removed
+
+        attackBehaviour.GetDirection(context);
     }
 
     public void Jump(InputAction.CallbackContext context)
