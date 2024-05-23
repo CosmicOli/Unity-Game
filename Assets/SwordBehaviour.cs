@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 public class SwordBehaviour : MonoBehaviour
 {
     public float damage;
+    public float knockbackStrength;
     public AttackBehaviour attackBehaviour;
     public GameObject Swing;
     private GameObject swordSwing;
@@ -26,7 +27,6 @@ public class SwordBehaviour : MonoBehaviour
         if (swordSwing != null)
         {
             swordSwing.transform.position = transform.position + currentDirection3D;
-
         }
     }
 
@@ -42,9 +42,12 @@ public class SwordBehaviour : MonoBehaviour
 
             // Creates a swing of the sword in a direction
             swordSwing = Instantiate(Swing, transform.position + currentDirection3D, rotationQuaternion);
-            swordSwing.GetComponent<SwingBehaviour>().damage = damage;
 
-            // If hit, deal damage to enemy and do some knockback
+            SwingBehaviour swordSwingBehaviour = swordSwing.GetComponent<SwingBehaviour>();
+
+            // Sets the damage and knockback the swing is supposed to impart
+            swordSwingBehaviour.damage = damage;
+            swordSwingBehaviour.knockback = knockbackStrength * currentDirection3D;
         }
     }
 }
