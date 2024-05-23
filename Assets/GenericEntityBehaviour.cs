@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GenericEnemyBehaviour : MonoBehaviour
+public class GenericEntityBehaviour : MonoBehaviour
 {
     public float health;
 

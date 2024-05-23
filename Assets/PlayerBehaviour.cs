@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerBehaviour : MonoBehaviour
+public class PlayerBehaviour : GenericEntityBehaviour
 {
     public Rigidbody2D rigidBody;
 

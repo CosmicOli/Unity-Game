@@ -4,8 +4,10 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Player Weapon
   - Weapon
+  - Boss
+  - Enemy
+  - Environmental Enemy
   layers:
   - Default
   - TransparentFX
@@ -15,7 +17,7 @@ TagManager:
   - UI
   - Floor
   - Walls
-  - 
+  - Environmental Enemies
   - 
   - 
   - 

@@ -28,7 +28,7 @@ public class SwingBehaviour : MonoBehaviour
         {
             hitEnemies.Add(hitObject);
 
-            GenericEnemyBehaviour hitObjectScript = hitObject.GetComponent<GenericEnemyBehaviour>();
+            GenericEntityBehaviour hitObjectScript = hitObject.GetComponent<GenericEntityBehaviour>();
 
             switch (hitObject.layer) // What type of object was hit
             {
@@ -50,7 +50,7 @@ public class SwingBehaviour : MonoBehaviour
                             goto default;
 
                         default:
-                            // Knock back the player
+                            
                             break;
                     }
 
