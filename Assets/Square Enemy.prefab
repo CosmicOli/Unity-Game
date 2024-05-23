@@ -172,3 +172,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 5
+  horizontalDrag: 1
+  horizontalAccelerationPower: 0
+  verticalAccelerationPower: 0
+  maximumHorizontalSpeedFromPower: 0
+  maximumVerticalVelocityFromPower: 0

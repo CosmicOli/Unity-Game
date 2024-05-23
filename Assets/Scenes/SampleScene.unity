@@ -755,8 +755,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  knockbackStrength: 3
-  attackBehaviour: {fileID: 0}
+  enemyKnockbackStrength: 0
+  playerKnockbackStrength: {x: 2, y: 5}
   Swing: {fileID: 6025346563292902474, guid: de7b0b85990abf249810fd2efe8ba25d, type: 3}
 --- !u!114 &1594592090
 MonoBehaviour:

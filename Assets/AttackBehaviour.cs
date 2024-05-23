@@ -8,10 +8,14 @@ public class AttackBehaviour : MonoBehaviour
     public Vector2 currentDirection;
     private Vector2 lastHorizontalDirection;
 
-    public Vector2 GetDirection(InputAction.CallbackContext context)
+    // Start is called before the first frame update
+    void Start()
     {
-        Vector2 inputDirection = context.ReadValue<Vector2>();
+        lastHorizontalDirection = new Vector2 (1, 0); // This should be able to be changed in the inspector
+    }
 
+    public Vector2 GetDirection(Vector2 inputDirection)
+    {
         if (Mathf.Abs(inputDirection.x) > 0 && inputDirection.y == 0)
         {
             lastHorizontalDirection = inputDirection;

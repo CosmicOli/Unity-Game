@@ -4,11 +4,20 @@ using UnityEngine;
 
 public class SwingBehaviour : MonoBehaviour
 {
-    public float damage; // This is always passed through by sword behavior
-    public Vector3 knockback; // This is always passed through by sword behavior
+    // These are always passed through by SwordBehavior
+    [HideInInspector]
+    public float damage; 
+    [HideInInspector]
+    public Vector3 enemyKnockbackStrength; 
+    [HideInInspector]
+    public Vector3 playerKnockbackStrength;
+    [HideInInspector]
+    public PlayerBehaviour playerBehaviour; 
+
     public float swingTime;
+
     private float timer = 0;
-    private List<GameObject> hitEnemies = new List<GameObject>();
+    private List<GameObject> hitEnemies = new List<GameObject>(); 
 
     // Update is called once per frame
     void Update()
@@ -28,12 +37,12 @@ public class SwingBehaviour : MonoBehaviour
         {
             hitEnemies.Add(hitObject);
 
-            GenericEntityBehaviour hitObjectScript = hitObject.GetComponent<GenericEntityBehaviour>();
+            GenericEntityBehaviour hitObjectBehaviour = hitObject.GetComponent<GenericEntityBehaviour>();
 
             switch (hitObject.layer) // What type of object was hit
             {
                 case 3: // Enemies layer, deal damage
-                    hitObjectScript.TakeDamage(damage);
+                    hitObjectBehaviour.TakeDamage(damage);
                     goto case 8;
 
                 case 8: // Environmental "enemies" layer, deal knockback
@@ -46,11 +55,11 @@ public class SwingBehaviour : MonoBehaviour
                             goto default;
 
                         case "Enemy": // Enemies take knockback based on the knockback applied
-                            hitObjectScript.TakeKnockback(knockback);
+                            hitObjectBehaviour.TakeKnockback(enemyKnockbackStrength);
                             goto default;
 
                         default:
-                            
+                            playerBehaviour.TakeKnockback(playerKnockbackStrength);
                             break;
                     }
 

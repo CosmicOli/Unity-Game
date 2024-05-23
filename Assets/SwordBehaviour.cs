@@ -8,9 +8,12 @@ using UnityEngine.InputSystem;
 public class SwordBehaviour : MonoBehaviour
 {
     public float damage;
-    public float knockbackStrength;
-    public AttackBehaviour attackBehaviour;
+    public float enemyKnockbackStrength;
+    public Vector2 playerKnockbackStrength;
     public GameObject Swing;
+
+    private AttackBehaviour attackBehaviour;
+    private PlayerBehaviour playerBehaviour;
     private GameObject swordSwing;
 
     private Vector3 currentDirection3D;
@@ -18,7 +21,10 @@ public class SwordBehaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        attackBehaviour = GameObject.FindGameObjectWithTag("Player").GetComponent<AttackBehaviour>();
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        attackBehaviour = player.GetComponent<AttackBehaviour>();
+        playerBehaviour = player.GetComponent<PlayerBehaviour>();
     }
 
     // Update is called once per frame
@@ -47,7 +53,9 @@ public class SwordBehaviour : MonoBehaviour
 
             // Sets the damage and knockback the swing is supposed to impart
             swordSwingBehaviour.damage = damage;
-            swordSwingBehaviour.knockback = knockbackStrength * currentDirection3D;
+            swordSwingBehaviour.enemyKnockbackStrength = enemyKnockbackStrength * currentDirection3D;
+            swordSwingBehaviour.playerKnockbackStrength = new Vector3(-1 * playerKnockbackStrength.x * currentDirection3D.x, -1 * playerKnockbackStrength.y * currentDirection3D.y, 0);
+            swordSwingBehaviour.playerBehaviour = playerBehaviour;
         }
     }
 }
