@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoxEnemyBehavior : GenericEntityBehaviour
+public class BoxEnemyBehavior : GenericGravityEntityBehaviour
 {
 
 }

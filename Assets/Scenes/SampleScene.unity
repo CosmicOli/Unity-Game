@@ -188,10 +188,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca1f2c26b656a024589e915cd7d27244, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 0
-  rigidBody: {fileID: 326657164}
-  runningPower: 5
-  jumpingPower: 5
+  health: 5
+  horizontalDrag: 1
+  verticalDrag: 0
+  horizontalAccelerationPower: 3
+  verticalAccelerationPower: 6
+  maximumHorizontalSpeedFromPower: 6
+  maximumVerticalSpeedFromPower: 0
   attackBehaviour: {fileID: 326657169}
 --- !u!50 &326657164
 Rigidbody2D:
@@ -575,7 +578,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 847287198}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: b6b555d51b249db459330605de169777, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -755,8 +758,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1
-  enemyKnockbackStrength: 0
-  playerKnockbackStrength: {x: 2, y: 5}
+  enemyKnockbackStrength: 5
+  playerKnockbackStrength: {x: 5, y: 5}
   Swing: {fileID: 6025346563292902474, guid: de7b0b85990abf249810fd2efe8ba25d, type: 3}
 --- !u!114 &1594592090
 MonoBehaviour:
@@ -901,6 +904,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1679195108}
     m_Modifications:
+    - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
+      propertyPath: health
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6261565532876153862, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
       propertyPath: m_Name
       value: Square Enemy

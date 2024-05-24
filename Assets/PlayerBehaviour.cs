@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerBehaviour : GenericEntityBehaviour
+public class PlayerBehaviour : GenericGravityEntityBehaviour
 {
     private Vector2 inputDirection;
 
@@ -43,7 +43,7 @@ public class PlayerBehaviour : GenericEntityBehaviour
     {
         isFacingRight = !isFacingRight;
         Vector3 localScale = transform.localScale;
-        localScale.x *= -1f;
+        localScale.x *= -1;
         transform.localScale = localScale;
     }
 
