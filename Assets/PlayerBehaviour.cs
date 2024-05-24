@@ -14,7 +14,7 @@ public class PlayerBehaviour : GenericEntityBehaviour
     public AttackBehaviour attackBehaviour;
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
         entityRigidBody = gameObject.GetComponent<Rigidbody2D>();
         entityRigidBody.freezeRotation = true;
@@ -33,39 +33,10 @@ public class PlayerBehaviour : GenericEntityBehaviour
         }
     }
 
-    private void FixedUpdate()
+    protected override void FixedUpdate()
     {
+        base.FixedUpdate();
         attackBehaviour.GetDirection(inputDirection);
-
-        Vector2 newVelocity = entityRigidBody.velocity;
-
-        if (Mathf.Abs(horizontalAccelerationDirection) > 0)
-        {
-            Debug.Log(horizontalAccelerationDirection);
-        }
-
-        if (Mathf.Abs(entityRigidBody.velocity.x) <= maximumHorizontalSpeedFromPower)
-        {
-            newVelocity += new Vector2(horizontalAccelerationDirection * horizontalAccelerationPower, 0);
-
-            // Cap the speed at the limit
-            if (Mathf.Abs(newVelocity.x) > maximumHorizontalSpeedFromPower)
-            {
-                newVelocity.x = Mathf.Sign(entityRigidBody.velocity.x) * maximumHorizontalSpeedFromPower;
-            }
-        }
-        else if (Mathf.Abs(entityRigidBody.velocity.x) > maximumHorizontalSpeedFromPower) // When past the speed limit in a direction a drag is experienced
-        {
-            TakeDragInAnAxis(ref newVelocity.x, horizontalDrag);
-        }
-
-        // When there is no attempt at acceleration a drag should be experienced.
-        if ((Mathf.Abs(horizontalAccelerationDirection) == 0 && Mathf.Abs(entityRigidBody.velocity.x) > 0) || (Mathf.Abs(entityRigidBody.velocity.x) > maximumHorizontalSpeedFromPower))
-        {
-            TakeDragInAnAxis(ref newVelocity.x, horizontalDrag);
-        }
-
-        entityRigidBody.velocity = newVelocity;
     }
 
     private void FlipCharacter()
