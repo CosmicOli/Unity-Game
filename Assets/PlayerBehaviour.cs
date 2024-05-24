@@ -16,7 +16,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     // Start is called before the first frame update
     protected override void Start()
     {
-        entityRigidBody = gameObject.GetComponent<Rigidbody2D>();
+        base.Start();
         entityRigidBody.freezeRotation = true;
     }
 

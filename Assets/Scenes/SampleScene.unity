@@ -195,6 +195,7 @@ MonoBehaviour:
   horizontalAccelerationPower: 3
   maximumHorizontalSpeedFromPower: 6
   jumpAccelerationPower: 15
+  terminalSpeed: 20
   attackBehaviour: {fileID: 326657169}
 --- !u!50 &326657164
 Rigidbody2D:
@@ -212,7 +213,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 3
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: b6b555d51b249db459330605de169777, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -909,6 +910,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
+      propertyPath: terminalSpeed
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
       propertyPath: horizontalDrag
       value: 1
       objectReference: {fileID: 0}
@@ -920,6 +925,14 @@ PrefabInstance:
       propertyPath: horizontalKnockbackModifier
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3256710008047842956, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
+      propertyPath: m_Mass
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3256710008047842956, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 6200000, guid: b6b555d51b249db459330605de169777, type: 2}
     - target: {fileID: 3256710008047842956, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
       propertyPath: m_GravityScale
       value: 3
