@@ -16,6 +16,9 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     private bool isGrounded = false;
 
+    private bool currentlyJumping = false;
+    private float? previousVerticalVelocity;
+
     public AttackBehaviour attackBehaviour;
 
     // Start is called before the first frame update
@@ -53,6 +56,11 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     {
         base.FixedUpdate();
         attackBehaviour.GetDirection(inputDirection);
+
+        if (currentlyJumping)
+        {
+            currentlyJumping = isJumping();
+        }
     }
 
     private void FlipCharacter()
@@ -76,6 +84,14 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         }
     }
 
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == 6)
+        {
+            isGrounded = false;
+        }
+    }
+
     public void Move(InputAction.CallbackContext context)
     {
         inputDirection = context.ReadValue<Vector2>();
@@ -92,7 +108,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
             if (context.performed)
             {
                 entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, jumpAccelerationPower);
-                isGrounded = false;
+                currentlyJumping = true;
             }
         }
         // If not on the ground, preregister the jump so it activates when hitting the floor
@@ -111,12 +127,37 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
             }
         }
 
-        if (context.canceled && entityRigidBody.velocity.y > 0f)
+        if (context.canceled && entityRigidBody.velocity.y > 0f && currentlyJumping)
         {
             // Reduces upwards velocity to a 20th
-            // This keeps responsiveness to stop the player quickly but doesn't fully stop the player.
-            // Currently a glitch where if pogoing the user can release space to cancel their upwards momentum. (would apply if any other source gave upwards velocity too though)
+            // This keeps responsiveness to stop the player quickly but doesn't fully stop the player
             entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, entityRigidBody.velocity.y * 1 / 20);
+        }
+    }
+
+    private bool isJumping()
+    {
+        float currentVerticalVelocity = entityRigidBody.velocity.y;
+
+        if (previousVerticalVelocity != null)
+        {
+            // If gravity and the current vertical acceleration match, no change in vertical acceleration has occured
+            // Note the multiples by 10000 and the conversion to nullable integers; this is to round the measured gravity
+            if ((int?)((currentVerticalVelocity - previousVerticalVelocity) * 10000) == (int?)(-9.81 * gravityScale * 10000 / 50))
+            {
+                previousVerticalVelocity = currentVerticalVelocity;
+                return true;
+            }
+            else
+            {
+                previousVerticalVelocity = null;
+                return false;
+            }
+        }
+        else
+        {
+            previousVerticalVelocity = currentVerticalVelocity;
+            return true;
         }
     }
 }

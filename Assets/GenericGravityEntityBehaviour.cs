@@ -6,7 +6,7 @@ public class GenericGravityEntityBehaviour : GenericHorizontalHorizontalEntityBe
 {
     public float jumpAccelerationPower;
     public float terminalSpeed;
-    private float gravityScale;
+    protected float gravityScale;
 
     // Start is called before the first frame update
     protected override void Start()
