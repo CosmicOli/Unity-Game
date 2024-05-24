@@ -67,13 +67,13 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     {
         if (context.performed && isGrounded)
         {
-            entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, verticalAccelerationPower);
+            entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, jumpAccelerationPower);
             isGrounded = false;
         }
 
         if (context.canceled && entityRigidBody.velocity.y > 0f)
         {
-            entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, entityRigidBody.velocity.y * 0.5f);
+            entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, entityRigidBody.velocity.y * 1 / 50);
         }
     }
 }

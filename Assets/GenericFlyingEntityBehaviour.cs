@@ -2,8 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GenericFlyingEntityBehaviour : GenericEntityBehaviour
+public class GenericFlyingEntityBehaviour : GenericHorizontalHorizontalEntityBehaviour
 {
+    public float verticalDrag;
+    protected float verticalAccelerationDirection;
+    public float maximumVerticalSpeedFromPower;
+    public float verticalAccelerationPower;
+
     protected virtual void FixedUpdate()
     {
         float newHorizontalVelocity = calculateGravitylessAxisVelocity(entityRigidBody.velocity.x, horizontalDrag, horizontalAccelerationPower, horizontalAccelerationDirection, maximumHorizontalSpeedFromPower);

@@ -11,17 +11,9 @@ public class GenericEntityBehaviour : MonoBehaviour
 {
     public float health;
 
-    public float horizontalDrag;
-    public float verticalDrag;
+    public float horizontalKnockbackModifier;
+    public float verticalKnockbackModifier;
 
-    public float horizontalAccelerationPower;
-    public float verticalAccelerationPower;
-
-    public float maximumHorizontalSpeedFromPower;
-    public float maximumVerticalSpeedFromPower;
-
-    protected float horizontalAccelerationDirection;
-    protected float verticalAccelerationDirection;
     protected Rigidbody2D entityRigidBody;
 
     // Start is called before the first frame update
@@ -120,12 +112,12 @@ public class GenericEntityBehaviour : MonoBehaviour
 
         if (Mathf.Abs(knockback2D.x) > 0)
         {
-            newVelocity.x = knockback2D.x;
+            newVelocity.x = horizontalKnockbackModifier * knockback2D.x;
         }
 
         if (Mathf.Abs(knockback2D.y) > 0)
         {
-            newVelocity.y = knockback2D.y;
+            newVelocity.y = verticalKnockbackModifier * knockback2D.y;
         }
 
         entityRigidBody.velocity = newVelocity;
