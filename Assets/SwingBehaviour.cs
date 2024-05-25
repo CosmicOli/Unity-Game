@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SwingBehaviour : MonoBehaviour
 {
-    // These are always passed through by SwordBehavior
+    // These "constants" defining damage, knockback, and swing time are always passed through by SwordBehavior
     [HideInInspector]
     public float damage; 
     [HideInInspector]
@@ -12,18 +12,22 @@ public class SwingBehaviour : MonoBehaviour
     [HideInInspector]
     public Vector3 playerKnockbackStrength;
     [HideInInspector]
-    public PlayerBehaviour playerBehaviour; 
-
+    public PlayerBehaviour playerBehaviour;
+    [HideInInspector]
     public float swingTime;
 
+    // This constant tracks how much time has passed since the Swing game object's creation
     private float timer = 0;
+
+    // This variable tracks the enemies hit by the Swing object to prevent double hitting the same object
     private List<GameObject> hitEnemies = new List<GameObject>(); 
 
     // Update is called once per frame
     void Update()
     {
+        // This tracks the time since the swing started, and finishes the swing if the correct time has ellapsed
         timer += Time.deltaTime;
-        if (timer >= 0.5)
+        if (timer >= swingTime)
         {
             Destroy(gameObject);
         }
@@ -33,8 +37,10 @@ public class SwingBehaviour : MonoBehaviour
     {
         GameObject hitObject = collision.gameObject;
 
+        // If the object hasn't already been hit
         if (!hitEnemies.Contains(hitObject))
         {
+            // Mark the object as having been hit
             hitEnemies.Add(hitObject);
 
             GenericEntityBehaviour hitObjectBehaviour = hitObject.GetComponent<GenericEntityBehaviour>();

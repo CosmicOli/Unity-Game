@@ -4,8 +4,13 @@ using UnityEngine;
 
 public class GenericGravityEntityBehaviour : GenericHorizontalHorizontalEntityBehaviour
 {
-    public float jumpAccelerationPower;
-    public float terminalSpeed;
+    // These constants define jumping power and the terminal falling speed
+    [SerializeField]
+    protected float JumpAccelerationPower;
+    [SerializeField]
+    private float TerminalSpeed;
+
+    // This "constant" contains a record of the gravity scale experienced by the entity
     protected float gravityScale;
 
     // Start is called before the first frame update
@@ -17,8 +22,8 @@ public class GenericGravityEntityBehaviour : GenericHorizontalHorizontalEntityBe
 
     protected virtual void FixedUpdate()
     {
-        float newHorizontalVelocity = calculateGravitylessAxisVelocity(entityRigidBody.velocity.x, horizontalDrag, horizontalAccelerationPower, horizontalAccelerationDirection, maximumHorizontalSpeedFromPower);
-        float newVerticalVelocity = calculateGravityAxisVelocity(entityRigidBody.velocity.y, terminalSpeed);
+        float newHorizontalVelocity = calculateGravitylessAxisVelocity(entityRigidBody.velocity.x, HorizontalDrag, HorizontalAccelerationPower, horizontalAccelerationDirection, MaximumHorizontalSpeedFromPower);
+        float newVerticalVelocity = calculateGravityAxisVelocity(entityRigidBody.velocity.y, TerminalSpeed);
 
         entityRigidBody.velocity = new Vector2(newHorizontalVelocity, newVerticalVelocity);
     }
@@ -31,7 +36,7 @@ public class GenericGravityEntityBehaviour : GenericHorizontalHorizontalEntityBe
 
         // If faster than the maximum speed then set to the maximum speed.
         // It is assumed that gravity acts downwards.
-        if (Mathf.Abs(newAxisVelocity) >= Mathf.Abs(terminalSpeed) && Mathf.Sign(-1 * newAxisVelocity) > 0)
+        if (Mathf.Abs(newAxisVelocity) >= Mathf.Abs(TerminalSpeed) && Mathf.Sign(-1 * newAxisVelocity) > 0)
         {
             newAxisVelocity = -1 * axisTerminalSpeed;
             entityRigidBody.gravityScale = 0;

@@ -9,11 +9,18 @@ using UnityEngine.Animations;
 
 public class GenericEntityBehaviour : MonoBehaviour
 {
-    public float health;
+    // This variable contains the current health of the entity
+    [SerializeField]
+    private float health;
 
-    public float horizontalKnockbackModifier;
-    public float verticalKnockbackModifier;
+    // These variables represent a multiplier to knockback based on an entities resistance to it
+    [SerializeField]
+    private float horizontalKnockbackModifier;
+    [SerializeField]
+    private float verticalKnockbackModifier;
 
+    // This "constant" refers to the entity's rigid body
+    // This is passed in automatically on start as every entity needs a rigid body
     protected Rigidbody2D entityRigidBody;
 
     // Start is called before the first frame update
@@ -21,6 +28,9 @@ public class GenericEntityBehaviour : MonoBehaviour
     {
         // A generic entity has a RigidBody 2D component
         entityRigidBody = gameObject.GetComponent<Rigidbody2D>();
+
+        // A generic entity shouldn't rotate
+        entityRigidBody.freezeRotation = true;
     }
 
     protected float calculateGravitylessAxisVelocity(float axisVelocity, float axisDrag, float axisAccelerationPower, float axisAccelerationDirection, float maximumAxisSpeedFromPower)
@@ -83,9 +93,10 @@ public class GenericEntityBehaviour : MonoBehaviour
     {
         float currentAxisDirection = Mathf.Sign(currentAxisVelocity);
 
+        // Drag is taken opposite to the direction of travel
         currentAxisVelocity -= currentAxisDirection * axisDrag;
 
-        // If the axis speed 
+        // If after taking drag the velocity is now in the opposite direction, set the velocity to 0
         if (currentAxisDirection != Mathf.Sign(currentAxisVelocity))
         {
             currentAxisVelocity = 0;
@@ -109,6 +120,8 @@ public class GenericEntityBehaviour : MonoBehaviour
         Vector2 knockback2D = new Vector2(knockback.x, knockback.y); // A direct assignment does this implicitly, however I find an explicit conversion to be more readable.
 
         Vector2 newVelocity = entityRigidBody.velocity;
+
+        // If the knockback in an axis isn't 0, set the velocity to the knockback
 
         if (Mathf.Abs(knockback2D.x) > 0)
         {

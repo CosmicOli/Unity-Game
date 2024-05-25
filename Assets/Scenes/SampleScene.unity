@@ -327,7 +327,7 @@ MonoBehaviour:
   maximumHorizontalSpeedFromPower: 6
   jumpAccelerationPower: 15
   terminalSpeed: 20
-  attackBehaviour: {fileID: 326657169}
+  AttackBehaviour: {fileID: 326657169}
 --- !u!50 &326657164
 Rigidbody2D:
   serializedVersion: 4
@@ -590,6 +590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d64e96379801e184cac869800088326c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  StartDirection: 1
   currentDirection: {x: 1, y: 0}
 --- !u!1 &519420028
 GameObject:
@@ -889,9 +890,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b76d06ab575502c48a4483368a4fcbf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
-  enemyKnockbackStrength: 8
-  playerKnockbackStrength: {x: 5, y: 10}
+  Damage: 1
+  EnemyKnockbackStrength: 8
+  PlayerKnockbackStrength: {x: 6, y: 8}
+  SwingTime: 0.5
   Swing: {fileID: 6025346563292902474, guid: de7b0b85990abf249810fd2efe8ba25d, type: 3}
 --- !u!114 &1594592090
 MonoBehaviour:
