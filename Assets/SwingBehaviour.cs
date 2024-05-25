@@ -4,23 +4,27 @@ using UnityEngine;
 
 public class SwingBehaviour : MonoBehaviour
 {
-    // These "constants" defining damage, knockback, and swing time are always passed through by SwordBehavior
-    [HideInInspector]
-    public float damage; 
-    [HideInInspector]
-    public Vector3 enemyKnockbackStrength; 
-    [HideInInspector]
-    public Vector3 playerKnockbackStrength;
-    [HideInInspector]
-    public PlayerBehaviour playerBehaviour;
-    [HideInInspector]
-    public float swingTime;
+    // These "constants" defining damage, knockback, swing time, and referencing the player behaviour script, are always passed through by SwordBehavior
+    private float damage; 
+    private Vector3 enemyKnockbackStrength; 
+    private Vector3 playerKnockbackStrength;
+    private float swingTime;
+    private PlayerBehaviour playerBehaviour;
 
     // This constant tracks how much time has passed since the Swing game object's creation
     private float timer = 0;
 
     // This variable tracks the enemies hit by the Swing object to prevent double hitting the same object
     private List<GameObject> hitEnemies = new List<GameObject>(); 
+
+    public void AssignConstants(float damage, Vector3 enemyKnockbackStrength, Vector3 playerKnockbackStrength, float swingTime, PlayerBehaviour playerBehaviour)
+    {
+        this.damage = damage;
+        this.enemyKnockbackStrength = enemyKnockbackStrength;
+        this.playerKnockbackStrength = playerKnockbackStrength;
+        this.swingTime = swingTime;
+        this.playerBehaviour = playerBehaviour;
+    }
 
     // Update is called once per frame
     void Update()

@@ -69,12 +69,8 @@ public class SwordBehaviour : MonoBehaviour
             // Gets the script associated with the Swing game object
             SwingBehaviour swordSwingBehaviour = swordSwing.GetComponent<SwingBehaviour>();
 
-            // Sets the damage and knockback the swing is supposed to impart
-            swordSwingBehaviour.damage = Damage;
-            swordSwingBehaviour.enemyKnockbackStrength = EnemyKnockbackStrength * currentDirection3D;
-            swordSwingBehaviour.playerKnockbackStrength = new Vector3(-1 * PlayerKnockbackStrength.x * currentDirection3D.x, -1 * PlayerKnockbackStrength.y * currentDirection3D.y, 0);
-            swordSwingBehaviour.swingTime = SwingTime;
-            swordSwingBehaviour.playerBehaviour = playerBehaviour;
+            // Assigns all the constants the Swing game object needs
+            swordSwingBehaviour.AssignConstants(Damage, EnemyKnockbackStrength * currentDirection3D, new Vector3(-1 * PlayerKnockbackStrength.x * currentDirection3D.x, -1 * PlayerKnockbackStrength.y * currentDirection3D.y, 0), SwingTime, playerBehaviour);
         }
     }
 }

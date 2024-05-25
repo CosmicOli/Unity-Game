@@ -322,11 +322,11 @@ MonoBehaviour:
   health: 5
   horizontalKnockbackModifier: 1
   verticalKnockbackModifier: 1
-  horizontalDrag: 1
-  horizontalAccelerationPower: 3
-  maximumHorizontalSpeedFromPower: 6
-  jumpAccelerationPower: 15
-  terminalSpeed: 20
+  HorizontalDrag: 1
+  HorizontalAccelerationPower: 3
+  MaximumHorizontalSpeedFromPower: 5
+  JumpAccelerationPower: 15
+  TerminalSpeed: 20
   AttackBehaviour: {fileID: 326657169}
 --- !u!50 &326657164
 Rigidbody2D:
@@ -1043,8 +1043,16 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
+      propertyPath: TerminalSpeed
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
       propertyPath: terminalSpeed
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
+      propertyPath: HorizontalDrag
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8968607334411375458, guid: 37b01c1591d4ab0428d435fda438f6b3, type: 3}
       propertyPath: horizontalDrag
