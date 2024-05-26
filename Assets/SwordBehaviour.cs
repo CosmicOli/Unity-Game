@@ -52,25 +52,28 @@ public class SwordBehaviour : MonoBehaviour
 
     public void Attack(InputAction.CallbackContext context)
     {
-        // If currently swinging and there is no instantiated Swing object, create one
-        if (context.performed && swordSwing == null)
+        if (playerBehaviour.currentlyAbleToInput)
         {
-            // Gets the current swing direction
-            Vector2 currentDirection = attackBehaviour.currentDirection;
-            currentDirection3D = new Vector3((int)(currentDirection.x), Mathf.Round(currentDirection.y)); // This favours up and down attacks as up and down are not needed in movement.
+            // If currently swinging and there is no instantiated Swing object, create one
+            if (context.performed && swordSwing == null)
+            {
+                // Gets the current swing direction
+                Vector2 currentDirection = attackBehaviour.currentDirection;
+                currentDirection3D = new Vector3((int)(currentDirection.x), Mathf.Round(currentDirection.y)); // This favours up and down attacks as up and down are not needed in movement.
 
-            // Gets the current swing rotation
-            Vector3 rotationVector = new Vector3(0, 0, -180 * Mathf.Atan2(currentDirection3D.x, currentDirection3D.y) / Mathf.PI);
-            Quaternion rotationQuaternion = Quaternion.Euler(rotationVector);
+                // Gets the current swing rotation
+                Vector3 rotationVector = new Vector3(0, 0, -180 * Mathf.Atan2(currentDirection3D.x, currentDirection3D.y) / Mathf.PI);
+                Quaternion rotationQuaternion = Quaternion.Euler(rotationVector);
 
-            // Creates a swing of the sword in a direction
-            swordSwing = Instantiate(Swing, transform.position + currentDirection3D, rotationQuaternion);
+                // Creates a swing of the sword in a direction
+                swordSwing = Instantiate(Swing, transform.position + currentDirection3D, rotationQuaternion);
 
-            // Gets the script associated with the Swing game object
-            SwingBehaviour swordSwingBehaviour = swordSwing.GetComponent<SwingBehaviour>();
+                // Gets the script associated with the Swing game object
+                SwingBehaviour swordSwingBehaviour = swordSwing.GetComponent<SwingBehaviour>();
 
-            // Assigns all the constants the Swing game object needs
-            swordSwingBehaviour.AssignConstants(Damage, EnemyKnockbackStrength * currentDirection3D, new Vector3(-1 * PlayerKnockbackStrength.x * currentDirection3D.x, -1 * PlayerKnockbackStrength.y * currentDirection3D.y, 0), SwingTime, playerBehaviour);
+                // Assigns all the constants the Swing game object needs
+                swordSwingBehaviour.AssignConstants(Damage, EnemyKnockbackStrength * currentDirection3D, new Vector3(-1 * PlayerKnockbackStrength.x * currentDirection3D.x, -1 * PlayerKnockbackStrength.y * currentDirection3D.y, 0), SwingTime, playerBehaviour);
+            }
         }
     }
 }

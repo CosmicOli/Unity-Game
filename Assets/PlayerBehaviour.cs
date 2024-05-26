@@ -10,26 +10,34 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     // This constant defines the standard taken knockback when hit
     public Vector2 StandardKnockback;
 
+
+    // This variable defines whether the user is currently able to input
+    public bool currentlyAbleToInput = true;
+
+
     // This variable defines whether the player was recently hit and hence whether they are currently in the just hit phase
     private bool justHit = false;
-
-    // This variable defines whether the player can currently input movement after being hit
-    private bool justHitMovementRestricted = false;
 
     // This variable defines the current time ellapsed since being hit
     private float justHitTimer = 0;
 
     // This constant defines how long before being able to move after being hit
-    private float JustHitMovementTimerCutoff = 0.2f;
+    private float JustHitMovementTimerCutoff = 0.3f;
 
     // This constant defines how long before being able to be hit consecutively
     private float JustHitImmunityTimerCutoff = 1;
+
+    // These variables retain input while unable to move
+    private Vector2 retainedInputDirection;
+    private float retainedHorizontalAccelerationDirection;
+
 
     // This variable is a normalised vector that points in the direction of movement input
     private Vector2 inputDirection;
 
     // This variable is used to mark the direction the player is facing
     private bool isFacingRight;
+
 
     // Variables used to allow a jump to be queued slightly before hitting the floor
     private bool jumpPreEntered = false;
@@ -40,20 +48,24 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     [HideInInspector]
     private float JumpPreEnterTimerCutoffTime = 0.05f;
 
-    // A variable that corresponds to whether the floor currently in contact
-    // Used to determine whether the player can jump
-    private bool isGrounded = false;
 
     // A variable that corresponds to whether the player is currently in a jump
     // This is used to make a distinction between upward velocity and jumping
     private bool currentlyJumping = false;
 
+    // A variable that corresponds to whether the floor currently in contact
+    // Used to determine whether the player can jump
+    private bool isGrounded = false;
+
+
     // This variable is used to determine vertical acceleration to see if any other force than gravity has been applied
     private float? previousVerticalVelocity;
+
     
     // This is a constant that links to the attack behaviour script
     [SerializeField]
     private AttackBehaviour AttackBehaviour;
+
 
     // Update is called once per frame
     void Update()
@@ -71,21 +83,28 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
             }
         }
 
+        // If just hit, update the timer
         if (justHit)
         {
             justHitTimer += Time.deltaTime;
 
-            if (justHitTimer > JustHitMovementTimerCutoff)
+            // If the timer exceeds the movement restriction cutoff, allow movement
+            if (justHitTimer > JustHitMovementTimerCutoff && currentlyAbleToInput == false)
             {
-                
+                currentlyAbleToInput = true;
+
+                inputDirection = retainedInputDirection;
+                horizontalAccelerationDirection = retainedHorizontalAccelerationDirection;
             }
 
+            // If the timer exceeds the immunity cutoff, allow taking damage and reset the timer
             if (justHitTimer > JustHitImmunityTimerCutoff)
             {
                 justHit = false;
                 justHitTimer = 0;
             }
         }
+
 
         // Change the character direction when changing input direction
         if (!isFacingRight && horizontalAccelerationDirection > 0f)
@@ -147,54 +166,56 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
-        // If just hit, no inputs should be valid
-        if (justHitMovementRestricted)
-        {
-            inputDirection = Vector2.zero;
-            horizontalAccelerationDirection = 0;
-        }
-        else
+        if (currentlyAbleToInput)
         {
             // When moving, update the input directions
             inputDirection = context.ReadValue<Vector2>();
             horizontalAccelerationDirection = inputDirection.x;
         }
+        else
+        {
+            retainedInputDirection = context.ReadValue<Vector2>();
+            retainedHorizontalAccelerationDirection = retainedInputDirection.x;
+        }
     }
 
     public void Jump(InputAction.CallbackContext context)
     {
-        // If on the ground then accelerate upwards
-        if (isGrounded)
+        if (currentlyAbleToInput)
         {
-            if (context.performed)
+            // If on the ground then accelerate upwards
+            if (isGrounded)
             {
-                entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, JumpAccelerationPower);
-                currentlyJumping = true;
+                if (context.performed)
+                {
+                    entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, JumpAccelerationPower);
+                    currentlyJumping = true;
+                }
             }
-        }
-        // If not on the ground, preregister the jump so it activates when hitting the floor
-        else
-        {
-            jumpPreEntered = true;
-            preEnteredContext = context;
-        }
-
-        // If the jump input is cancelled
-        if (context.canceled)
-        {
-            // If the jump is pre-entered, cancel the pre-enter
-            if (jumpPreEntered)
+            // If not on the ground, preregister the jump so it activates when hitting the floor
+            else
             {
-                jumpPreEntered = false;
-                jumpPreEnteredTimer = 0;
+                jumpPreEntered = true;
+                preEnteredContext = context;
             }
 
-            // If the jump is currently happening, cancel the current jump
-            if (entityRigidBody.velocity.y > 0f && currentlyJumping)
+            // If the jump input is cancelled
+            if (context.canceled)
             {
-                // Reduces upwards velocity to a 20th
-                // This keeps responsiveness to stop the player quickly but doesn't fully stop the player
-                entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, entityRigidBody.velocity.y * 1 / 20);
+                // If the jump is pre-entered, cancel the pre-enter
+                if (jumpPreEntered)
+                {
+                    jumpPreEntered = false;
+                    jumpPreEnteredTimer = 0;
+                }
+
+                // If the jump is currently happening, cancel the current jump
+                if (entityRigidBody.velocity.y > 0f && currentlyJumping)
+                {
+                    // Reduces upwards velocity to a 20th
+                    // This keeps responsiveness to stop the player quickly but doesn't fully stop the player
+                    entityRigidBody.velocity = new Vector2(entityRigidBody.velocity.x, entityRigidBody.velocity.y * 1 / 20);
+                }
             }
         }
     }
@@ -235,7 +256,15 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         {
             base.TakeDamage(damage);
 
+            retainedInputDirection = inputDirection;
+            retainedHorizontalAccelerationDirection = horizontalAccelerationDirection;
+
+            inputDirection = Vector2.zero;
+            horizontalAccelerationDirection = 0;
+
             justHit = true;
+
+            currentlyAbleToInput = false;
         }
     }
 

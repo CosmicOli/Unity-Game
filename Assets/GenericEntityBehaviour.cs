@@ -53,7 +53,7 @@ public class GenericEntityBehaviour : MonoBehaviour
             // If the drag is greater than the acceleration and the drag will remove more than the current speed, take a proportion of drag and acceleration
             else
             {
-                newAxisVelocity = (1 - newAxisVelocity / axisDrag)  * axisAccelerationDirection * axisAccelerationPower;
+                newAxisVelocity = (1 - newAxisVelocity / axisDrag) * axisAccelerationDirection * axisAccelerationPower;
             }
         }
         // If the entity is trying to speed up
