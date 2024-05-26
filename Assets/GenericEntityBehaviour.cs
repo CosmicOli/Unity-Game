@@ -105,7 +105,7 @@ public class GenericEntityBehaviour : MonoBehaviour
         return currentAxisVelocity;
     }
 
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage)
     {
         health -= damage;
 
@@ -115,22 +115,20 @@ public class GenericEntityBehaviour : MonoBehaviour
         }
     }
 
-    public void TakeKnockback(Vector3 knockback)
+    public virtual void TakeKnockback(Vector3 knockback)
     {
-        Vector2 knockback2D = new Vector2(knockback.x, knockback.y); // A direct assignment does this implicitly, however I find an explicit conversion to be more readable.
-
         Vector2 newVelocity = entityRigidBody.velocity;
 
         // If the knockback in an axis isn't 0, set the velocity to the knockback
 
-        if (Mathf.Abs(knockback2D.x) > 0)
+        if (Mathf.Abs(knockback.x) > 0)
         {
-            newVelocity.x = horizontalKnockbackModifier * knockback2D.x;
+            newVelocity.x = horizontalKnockbackModifier * knockback.x;
         }
 
-        if (Mathf.Abs(knockback2D.y) > 0)
+        if (Mathf.Abs(knockback.y) > 0)
         {
-            newVelocity.y = verticalKnockbackModifier * knockback2D.y;
+            newVelocity.y = verticalKnockbackModifier * knockback.y;
         }
 
         entityRigidBody.velocity = newVelocity;

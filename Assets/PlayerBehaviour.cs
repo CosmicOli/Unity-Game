@@ -1,11 +1,30 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerBehaviour : GenericGravityEntityBehaviour
 {
+    // This constant defines the standard taken knockback when hit
+    public Vector2 StandardKnockback;
+
+    // This variable defines whether the player was recently hit and hence whether they are currently in the just hit phase
+    private bool justHit = false;
+
+    // This variable defines whether the player can currently input movement after being hit
+    private bool justHitMovementRestricted = false;
+
+    // This variable defines the current time ellapsed since being hit
+    private float justHitTimer = 0;
+
+    // This constant defines how long before being able to move after being hit
+    private float JustHitMovementTimerCutoff = 0.2f;
+
+    // This constant defines how long before being able to be hit consecutively
+    private float JustHitImmunityTimerCutoff = 1;
+
     // This variable is a normalised vector that points in the direction of movement input
     private Vector2 inputDirection;
 
@@ -17,6 +36,10 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     private float jumpPreEnteredTimer = 0;
     private InputAction.CallbackContext preEnteredContext;
 
+    // This constant defines how long before jump pre-entering is cut off
+    [HideInInspector]
+    private float JumpPreEnterTimerCutoffTime = 0.05f;
+
     // A variable that corresponds to whether the floor currently in contact
     // Used to determine whether the player can jump
     private bool isGrounded = false;
@@ -27,7 +50,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     // This variable is used to determine vertical acceleration to see if any other force than gravity has been applied
     private float? previousVerticalVelocity;
-
+    
     // This is a constant that links to the attack behaviour script
     [SerializeField]
     private AttackBehaviour AttackBehaviour;
@@ -41,10 +64,26 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
             jumpPreEnteredTimer += Time.deltaTime;
 
             // If the ellapsed time exceeds the cutoff time, the jump is marked as no longer having been pre-entered
-            if (jumpPreEnteredTimer > 0.05)
+            if (jumpPreEnteredTimer > JumpPreEnterTimerCutoffTime)
             {
                 jumpPreEntered = false;
                 jumpPreEnteredTimer = 0;
+            }
+        }
+
+        if (justHit)
+        {
+            justHitTimer += Time.deltaTime;
+
+            if (justHitTimer > JustHitMovementTimerCutoff)
+            {
+                
+            }
+
+            if (justHitTimer > JustHitImmunityTimerCutoff)
+            {
+                justHit = false;
+                justHitTimer = 0;
             }
         }
 
@@ -108,9 +147,18 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
-        // When moving, update the input directions
-        inputDirection = context.ReadValue<Vector2>();
-        horizontalAccelerationDirection = inputDirection.x;
+        // If just hit, no inputs should be valid
+        if (justHitMovementRestricted)
+        {
+            inputDirection = Vector2.zero;
+            horizontalAccelerationDirection = 0;
+        }
+        else
+        {
+            // When moving, update the input directions
+            inputDirection = context.ReadValue<Vector2>();
+            horizontalAccelerationDirection = inputDirection.x;
+        }
     }
 
     public void Jump(InputAction.CallbackContext context)
@@ -178,6 +226,24 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         {
             previousVerticalVelocity = currentVerticalVelocity;
             return true;
+        }
+    }
+
+    public override void TakeDamage(float damage)
+    {
+        if (!justHit)
+        {
+            base.TakeDamage(damage);
+
+            justHit = true;
+        }
+    }
+
+    public override void TakeKnockback(Vector3 knockback)
+    {
+        if (!justHit)
+        {
+            base.TakeKnockback(knockback);
         }
     }
 }

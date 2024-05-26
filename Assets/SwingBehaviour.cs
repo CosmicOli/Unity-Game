@@ -51,7 +51,7 @@ public class SwingBehaviour : MonoBehaviour
 
             switch (hitObject.layer) // What type of object was hit
             {
-                case 3: // Enemies layer, deal damage
+                case 9: // Enemies layer, deal damage
                     hitObjectBehaviour.TakeDamage(damage);
                     goto case 8;
 

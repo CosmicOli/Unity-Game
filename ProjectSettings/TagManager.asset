@@ -12,13 +12,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Enemy
+  - Player
   - Water
   - UI
   - Floor
   - Walls
   - Environmental Enemies
-  - 
+  - Enemy
   - 
   - 
   - 
