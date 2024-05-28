@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -61,11 +62,31 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     // This variable is used to determine vertical acceleration to see if any other force than gravity has been applied
     private float? previousVerticalVelocity;
 
-    
+
+    // This constant is used to determine the offset from the player's centre and their feet
+    private float PlayerCentreToFeetOffset = 0.50f;
+
+
+    // This "constant" is used to refer to the player's collider
+    private BoxCollider2D playerCollider;
+
+
     // This is a constant that links to the attack behaviour script
     [SerializeField]
     private AttackBehaviour AttackBehaviour;
 
+
+    // This variable stores where the player is currently pointing
+    private Vector3 currentDirection3D;
+
+
+    // Start is called before the first frame update
+    protected override void Start()
+    {
+        base.Start();
+
+        playerCollider = gameObject.GetComponent<BoxCollider2D>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -145,22 +166,42 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         // If on the floor, update isGrounded
         if (collision.gameObject.layer == 6)
         {
-            isGrounded = true;
+            GenericFloorBehaviour FloorBehaviour = collision.gameObject.GetComponent<GenericFloorBehaviour>();
 
-            // If the player has pre-entered jump, jump
-            if (jumpPreEntered)
+            // If the player is on the top of the floor object
+            if (gameObject.transform.position.y - PlayerCentreToFeetOffset >= FloorBehaviour.JumpableSurfaceEquation(gameObject.transform.position.x))
             {
-                Jump(preEnteredContext);
+                isGrounded = true;
+
+                // If the player has pre-entered jump, jump
+                if (jumpPreEntered)
+                {
+                    Jump(preEnteredContext);
+                }
             }
         }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
+        Collider2D floorStillInCollision = Physics2D.OverlapBox(gameObject.transform.position, new Vector2(playerCollider.size.x * gameObject.transform.localScale.x, playerCollider.size.y * gameObject.transform.localScale.y), gameObject.transform.rotation.eulerAngles.z, LayerMask.GetMask("Floor"));
+
         // If no longer on the floor, update isGrounded
-        if (collision.gameObject.layer == 6)
+        // Note the overlap box condition; this is to account for if the player is contacting a different floor
+        if (collision.gameObject.layer == 6 && !floorStillInCollision)
         {
             isGrounded = false;
+        }
+        // If still touching a floor, see if on top of this floor
+        // If not, mark as no longer grounded
+        else if (collision.gameObject.layer == 6)
+        {
+            GenericFloorBehaviour FloorBehaviour = floorStillInCollision.gameObject.GetComponent<GenericFloorBehaviour>();
+
+            if (gameObject.transform.position.y - PlayerCentreToFeetOffset < FloorBehaviour.JumpableSurfaceEquation(gameObject.transform.position.x))
+            {
+                isGrounded = false;
+            }
         }
     }
 
