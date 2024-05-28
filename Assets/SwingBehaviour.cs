@@ -76,6 +76,16 @@ public class SwingBehaviour : MonoBehaviour
                     break;
 
                 case 6:
+                    // If the player is on top of the hit object, don't apply knockback
+                    if (!playerBehaviour.CurrentlyOnTopOfWallOrFloor(hitObject))
+                    {
+                        // If the player is not on top of the object but still hits it downwards, don't pogo
+                        if (!(playerKnockbackStrength.y > 0 && playerKnockbackStrength.x == 0))
+                        {
+                            playerBehaviour.TakeKnockback(new Vector2(playerKnockbackStrength.x, playerKnockbackStrength.y / 2));
+                        }
+                    }
+
                     break;
 
                 default:

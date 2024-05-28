@@ -347,7 +347,7 @@ MonoBehaviour:
   MaximumHorizontalSpeedFromPower: 5
   JumpAccelerationPower: 15
   TerminalSpeed: 20
-  StandardKnockback: {x: -8, y: 8}
+  StandardContactKnockback: {x: -8, y: 8}
   currentlyAbleToInput: 1
   AttackBehaviour: {fileID: 326657169}
 --- !u!50 &326657164
@@ -1260,7 +1260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 1
   EnemyKnockbackStrength: 8
-  PlayerKnockbackStrength: {x: 6, y: 8}
+  PlayerKnockbackStrength: {x: 8, y: 8}
   SwingTime: 0.5
   Swing: {fileID: 6025346563292902474, guid: de7b0b85990abf249810fd2efe8ba25d, type: 3}
 --- !u!114 &1594592090

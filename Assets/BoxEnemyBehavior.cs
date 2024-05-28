@@ -78,7 +78,7 @@ public class BoxEnemyBehavior : GenericGravityEntityBehaviour, EntityAIInterface
             stillInContact = true;
             currentCollision = collision;
 
-            Vector3 playerKnockback = playerBehaviour.StandardKnockback;
+            Vector3 playerKnockback = playerBehaviour.StandardContactKnockback;
 
             // If to the left of the player, hit them right instead of left
             if (gameObject.transform.position.x < player.transform.position.x)

@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 public class PlayerBehaviour : GenericGravityEntityBehaviour
 {
     // This constant defines the standard taken knockback when hit
-    public Vector2 StandardKnockback;
+    public Vector2 StandardContactKnockback;
 
 
     // This variable defines whether the user is currently able to input
@@ -166,10 +166,8 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         // If colliding with the environment
         if (collision.gameObject.layer == 6)
         {
-            GenericFloorBehaviour FloorBehaviour = collision.gameObject.GetComponent<GenericFloorBehaviour>();
-
             // If the player is on the top of the floor object
-            if (gameObject.transform.position.y - PlayerCentreToFeetOffset >= FloorBehaviour.JumpableSurfaceEquation(gameObject.transform.position.x))
+            if (CurrentlyOnTopOfWallOrFloor(collision.gameObject))
             {
                 isGrounded = true;
 
@@ -184,7 +182,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        Collider2D environmentStillInCollision = Physics2D.OverlapBox(gameObject.transform.position, new Vector2(playerCollider.size.x * gameObject.transform.localScale.x, playerCollider.size.y * gameObject.transform.localScale.y), gameObject.transform.rotation.eulerAngles.z, LayerMask.GetMask("Floor and Walls"));
+        Collider2D environmentStillInCollision = Physics2D.OverlapBox(gameObject.transform.position, new Vector2(playerCollider.size.x * gameObject.transform.localScale.x, playerCollider.size.y * gameObject.transform.localScale.y), gameObject.transform.rotation.eulerAngles.z, LayerMask.GetMask("Floors and Walls"));
 
         // If no longer touching the environment, update isGrounded
         if (collision.gameObject.layer == 6 && !environmentStillInCollision)
@@ -195,13 +193,18 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         // If not, mark as no longer grounded
         else if (collision.gameObject.layer == 6)
         {
-            GenericFloorBehaviour FloorBehaviour = environmentStillInCollision.gameObject.GetComponent<GenericFloorBehaviour>();
-
-            if (gameObject.transform.position.y - PlayerCentreToFeetOffset < FloorBehaviour.JumpableSurfaceEquation(gameObject.transform.position.x))
+            if (!CurrentlyOnTopOfWallOrFloor(environmentStillInCollision.gameObject))
             {
                 isGrounded = false;
             }
         }
+    }
+
+    public bool CurrentlyOnTopOfWallOrFloor(GameObject WallOrFloor)
+    {
+        GenericFloorBehaviour FloorBehaviour = WallOrFloor.GetComponent<GenericFloorBehaviour>();
+
+        return (gameObject.transform.position.y - PlayerCentreToFeetOffset >= FloorBehaviour.JumpableSurfaceEquation(gameObject.transform.position.x));
     }
 
     public void Move(InputAction.CallbackContext context)
