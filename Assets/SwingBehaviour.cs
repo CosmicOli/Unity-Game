@@ -82,6 +82,7 @@ public class SwingBehaviour : MonoBehaviour
                         // If the player is not on top of the object but still hits it downwards, don't pogo
                         if (!(playerKnockbackStrength.y > 0 && playerKnockbackStrength.x == 0))
                         {
+                            // Vertical knockback is halved to not be too strong
                             playerBehaviour.TakeKnockback(new Vector2(playerKnockbackStrength.x, playerKnockbackStrength.y / 2));
                         }
                     }

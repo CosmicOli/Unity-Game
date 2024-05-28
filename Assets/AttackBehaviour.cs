@@ -27,7 +27,7 @@ public class AttackBehaviour : MonoBehaviour
         // If a horizontal input is detected then update the current horizontal direction
         if (Mathf.Abs(inputDirection.x) > 0)
         {
-            lastHorizontalDirection = inputDirection;
+            lastHorizontalDirection = new Vector2(Mathf.Sign(inputDirection.x), 0);
         }
 
         // If an input is being given then update the current direction
