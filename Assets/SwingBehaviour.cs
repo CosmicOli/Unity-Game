@@ -75,8 +75,7 @@ public class SwingBehaviour : MonoBehaviour
 
                     break;
 
-                case 7:
-                    //Debug.Log("hit wall");
+                case 6:
                     break;
 
                 default:

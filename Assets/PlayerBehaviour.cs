@@ -163,7 +163,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // If on the floor, update isGrounded
+        // If colliding with the environment
         if (collision.gameObject.layer == 6)
         {
             GenericFloorBehaviour FloorBehaviour = collision.gameObject.GetComponent<GenericFloorBehaviour>();
@@ -184,19 +184,18 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        Collider2D floorStillInCollision = Physics2D.OverlapBox(gameObject.transform.position, new Vector2(playerCollider.size.x * gameObject.transform.localScale.x, playerCollider.size.y * gameObject.transform.localScale.y), gameObject.transform.rotation.eulerAngles.z, LayerMask.GetMask("Floor"));
+        Collider2D environmentStillInCollision = Physics2D.OverlapBox(gameObject.transform.position, new Vector2(playerCollider.size.x * gameObject.transform.localScale.x, playerCollider.size.y * gameObject.transform.localScale.y), gameObject.transform.rotation.eulerAngles.z, LayerMask.GetMask("Floor and Walls"));
 
-        // If no longer on the floor, update isGrounded
-        // Note the overlap box condition; this is to account for if the player is contacting a different floor
-        if (collision.gameObject.layer == 6 && !floorStillInCollision)
+        // If no longer touching the environment, update isGrounded
+        if (collision.gameObject.layer == 6 && !environmentStillInCollision)
         {
             isGrounded = false;
         }
-        // If still touching a floor, see if on top of this floor
+        // If still touching an environment object, see if on top of this object
         // If not, mark as no longer grounded
         else if (collision.gameObject.layer == 6)
         {
-            GenericFloorBehaviour FloorBehaviour = floorStillInCollision.gameObject.GetComponent<GenericFloorBehaviour>();
+            GenericFloorBehaviour FloorBehaviour = environmentStillInCollision.gameObject.GetComponent<GenericFloorBehaviour>();
 
             if (gameObject.transform.position.y - PlayerCentreToFeetOffset < FloorBehaviour.JumpableSurfaceEquation(gameObject.transform.position.x))
             {

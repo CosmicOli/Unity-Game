@@ -15,8 +15,8 @@ TagManager:
   - Player
   - Water
   - UI
-  - Floor
-  - Walls
+  - Floors and Walls
+  - Environmental Interactables
   - Environmental Enemies
   - Enemy
   - 
