@@ -305,6 +305,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ad1647f5e26a624ca827eeaceded842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HorizontalCameraBounding: 0
+  RelativeHorizontalCameraBounding: 0
+  VerticalCameraBounding: 0
+  RelativeVerticalCameraBounding: 0
 --- !u!1 &326657162
 GameObject:
   m_ObjectHideFlags: 0
@@ -674,7 +678,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 70
   orthographic: 1
   orthographic size: 7
   m_Depth: -1
@@ -719,6 +723,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9ab05006587fdc498e6a4f72173a701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Camera: {fileID: 519420031}
 --- !u!1001 &679307398
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -927,6 +932,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ad1647f5e26a624ca827eeaceded842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HorizontalCameraBounding: 0
+  RelativeHorizontalCameraBounding: 0
+  VerticalCameraBounding: 1
+  RelativeVerticalCameraBounding: -2
 --- !u!1 &1020441925
 GameObject:
   m_ObjectHideFlags: 0
@@ -1070,6 +1079,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ad1647f5e26a624ca827eeaceded842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HorizontalCameraBounding: 0
+  RelativeHorizontalCameraBounding: 0
+  VerticalCameraBounding: 0
+  RelativeVerticalCameraBounding: 0
 --- !u!1 &1182529258
 GameObject:
   m_ObjectHideFlags: 0
@@ -1213,6 +1226,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ad1647f5e26a624ca827eeaceded842, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HorizontalCameraBounding: 1
+  RelativeHorizontalCameraBounding: -2
+  VerticalCameraBounding: 0
+  RelativeVerticalCameraBounding: 0
 --- !u!1 &1594592087
 GameObject:
   m_ObjectHideFlags: 0

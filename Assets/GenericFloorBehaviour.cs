@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using UnityEngine;
 
-public abstract class GenericFloorBehaviour : MonoBehaviour
+public abstract class GenericFloorBehaviour : GenericEnvironmentBehaviour
 {
     public abstract float JumpableSurfaceEquation(float x);
 
