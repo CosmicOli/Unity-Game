@@ -724,6 +724,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Camera: {fileID: 519420031}
+  CameraLag: 1
 --- !u!1001 &679307398
 PrefabInstance:
   m_ObjectHideFlags: 0
