@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GenericGravityEntityBehaviour : GenericHorizontalHorizontalEntityBehaviour
+public class GenericGravityEntityBehaviour : GenericHorizontalEntityBehaviour
 {
     // These constants define jumping power and the terminal falling speed
     [SerializeField]

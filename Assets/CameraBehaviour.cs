@@ -1,16 +1,25 @@
+using JetBrains.Annotations;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class CameraBehaviour : MonoBehaviour
 {
     PlayerBehaviour playerBehaviour;
     GameObject playerGameObject;
+    Rigidbody2D playerRigidBody;
 
     public Camera Camera;
 
     public float CameraLag;
+
+    public float horizontalVelocityTimer;
+
+    private float horizontalVelocityTimerMaximum = 0.2f;
 
     bool currentlyFixed;
 
@@ -19,6 +28,7 @@ public class CameraBehaviour : MonoBehaviour
     {
         playerGameObject = GameObject.FindGameObjectWithTag("Player");
         playerBehaviour = playerGameObject.GetComponent<PlayerBehaviour>();
+        playerRigidBody = playerGameObject.GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -32,67 +42,72 @@ public class CameraBehaviour : MonoBehaviour
             float leftBound = Mathf.NegativeInfinity;
             float rightBound = Mathf.Infinity;
 
-            Vector3 CameraPosition = gameObject.transform.position;
-            Vector2 relativePosition = playerGameObject.transform.position - CameraPosition;
+            Vector3 cameraPosition = gameObject.transform.position;
+            Vector2 PlayerPosition = playerGameObject.transform.position;
+            Vector2 RelativePosition = playerGameObject.transform.position - cameraPosition;
 
-            if (Mathf.Abs(relativePosition.x) > CameraLag || Mathf.Abs(relativePosition.y) > CameraLag)
+            if (Mathf.Abs(playerRigidBody.velocity.x) > 0)
             {
-                // Follow the player
-                // 
+                horizontalVelocityTimer += Time.deltaTime;
 
-                if (Mathf.Abs(relativePosition.x) > CameraLag)
+                if (horizontalVelocityTimer > horizontalVelocityTimerMaximum)
                 {
-                    CameraPosition.x = playerGameObject.transform.position.x - Mathf.Sign(relativePosition.x) * CameraLag;
+                  horizontalVelocityTimer = horizontalVelocityTimerMaximum;
                 }
+            }
+            else
+            {
+                horizontalVelocityTimer -= Time.deltaTime;
 
-                if (Mathf.Abs(relativePosition.y) > CameraLag)
+                if (horizontalVelocityTimer < 0)
                 {
-                    CameraPosition.y = playerGameObject.transform.position.y - Mathf.Sign(relativePosition.y) * CameraLag;
+                    horizontalVelocityTimer = 0;
                 }
-
-                float CameraHeight = Camera.orthographicSize;
-                float CameraWidth = Camera.orthographicSize * 16 / 9;
-
-                topBound = CalculateVerticalCameraBound(Vector2.up, CameraHeight);
-                bottomBound = CalculateVerticalCameraBound(Vector2.down, CameraHeight);
-                leftBound = CalculateHorizontalCameraBound(Vector2.left, CameraWidth);
-                rightBound = CalculateHorizontalCameraBound(Vector2.right, CameraWidth);
-
-                if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(rightBound) != Mathf.Infinity)
-                {
-                    CameraPosition.x = (leftBound + rightBound) / 2;
-                }
-                else if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(leftBound) < Mathf.Abs(CameraPosition.x - CameraWidth))
-                {
-                    CameraPosition.x = leftBound + CameraWidth;
-                }
-                else if (Mathf.Abs(rightBound) != Mathf.Infinity && Mathf.Abs(rightBound) < Mathf.Abs(CameraPosition.x + CameraWidth))
-                {
-                    CameraPosition.x = rightBound - CameraWidth;
-                }
-
-                if (Mathf.Abs(bottomBound) != Mathf.Infinity && Mathf.Abs(topBound) != Mathf.Infinity)
-                {
-                    CameraPosition.y = (bottomBound + topBound) / 2;
-                }
-                else if (Mathf.Abs(bottomBound) != Mathf.Infinity && Mathf.Abs(bottomBound) < Mathf.Abs(CameraPosition.y - CameraHeight))
-                {
-                    CameraPosition.y = bottomBound + CameraHeight;
-                }
-                else if (Mathf.Abs(topBound) != Mathf.Infinity && Mathf.Abs(topBound) < Mathf.Abs(CameraPosition.y + CameraHeight))
-                {
-                    CameraPosition.y = topBound - CameraHeight;
-                }
-
-                gameObject.transform.position = CameraPosition;
             }
 
-            // Let the player move briefly to convey movement 
-            // Then lock the camera relative to the player
+            // If direction change reset timer?
+
+            cameraPosition.x = TrackObjectInAxis(cameraPosition.x, PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
+
+            float CameraHeight = Camera.orthographicSize;
+            float CameraWidth = Camera.orthographicSize * 16 / 9;
+
+            topBound = CalculateVerticalCameraBound(Vector2.up, CameraHeight);
+            bottomBound = CalculateVerticalCameraBound(Vector2.down, CameraHeight);
+            leftBound = CalculateHorizontalCameraBound(Vector2.left, CameraWidth);
+            rightBound = CalculateHorizontalCameraBound(Vector2.right, CameraWidth);
+
+            if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(rightBound) != Mathf.Infinity)
+            {
+                cameraPosition.x = (leftBound + rightBound) / 2;
+            }
+            else if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(leftBound) < Mathf.Abs(cameraPosition.x - CameraWidth))
+            {
+                cameraPosition.x = leftBound + CameraWidth;
+            }
+            else if (Mathf.Abs(rightBound) != Mathf.Infinity && Mathf.Abs(rightBound) < Mathf.Abs(cameraPosition.x + CameraWidth))
+            {
+                cameraPosition.x = rightBound - CameraWidth;
+            }
+
+            if (Mathf.Abs(bottomBound) != Mathf.Infinity && Mathf.Abs(topBound) != Mathf.Infinity)
+            {
+                cameraPosition.y = (bottomBound + topBound) / 2;
+            }
+            else if (Mathf.Abs(bottomBound) != Mathf.Infinity && Mathf.Abs(bottomBound) < Mathf.Abs(cameraPosition.y - CameraHeight))
+            {
+                cameraPosition.y = bottomBound + CameraHeight;
+            }
+            else if (Mathf.Abs(topBound) != Mathf.Infinity && Mathf.Abs(topBound) < Mathf.Abs(cameraPosition.y + CameraHeight))
+            {
+                cameraPosition.y = topBound - CameraHeight;
+            }
+
+            gameObject.transform.position = cameraPosition;
         }
     }
 
-    public float CalculateHorizontalCameraBound(Vector2 BoundDirection, float CameraWidth)
+    private float CalculateHorizontalCameraBound(Vector2 BoundDirection, float CameraWidth)
     {
         RaycastHit2D[] hitObjects = Physics2D.RaycastAll(playerGameObject.transform.position, BoundDirection, CameraWidth, LayerMask.GetMask("Floors and Walls"));
 
@@ -109,7 +124,7 @@ public class CameraBehaviour : MonoBehaviour
         return BoundDirection.x * Mathf.Infinity;
     }
 
-    public float CalculateVerticalCameraBound(Vector2 BoundDirection, float CameraHeight)
+    private float CalculateVerticalCameraBound(Vector2 BoundDirection, float CameraHeight)
     {
         RaycastHit2D[] hitObjects = Physics2D.RaycastAll(playerGameObject.transform.position, BoundDirection, CameraHeight, LayerMask.GetMask("Floors and Walls"));
 
@@ -124,6 +139,45 @@ public class CameraBehaviour : MonoBehaviour
         }
 
         return BoundDirection.y * Mathf.Infinity;
+    }
+
+    private float TrackObjectInAxis(float cameraAxisPosition, float PlayerAxisPosition, float AxisVelocityTimer, float AxisVelocity)
+    {
+        float direction;
+        if (playerBehaviour.isFacingRight)
+        {
+            direction = 1;
+        }
+        else
+        {
+            direction = -1;
+        }
+
+        float timeFactor = 0;
+        if (horizontalVelocityTimer > 0)
+        {
+            float speedFactor = 0;
+            if (Mathf.Abs(AxisVelocity) > 5)
+            {
+                speedFactor = (AxisVelocity - direction * 5) / 5;
+            }
+
+            Func<float, float> LinearCurve = n => (CameraLag + direction * speedFactor) * n / horizontalVelocityTimerMaximum;
+            timeFactor = direction * LinearCurve(AxisVelocityTimer);
+
+            Debug.Log(speedFactor);
+
+            if (Mathf.Abs(timeFactor) >= CameraLag + direction * speedFactor)
+            {
+                timeFactor = Mathf.Sign(timeFactor) * (CameraLag + direction * speedFactor);
+            }
+        }
+
+        float defaultRelativePlayerAxisPosition = direction * CameraLag;
+
+        cameraAxisPosition = PlayerAxisPosition + defaultRelativePlayerAxisPosition - timeFactor;
+
+        return cameraAxisPosition;                                                                                                                                                          
     }
 
     public void FixCamera(Vector2 position)

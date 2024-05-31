@@ -37,7 +37,8 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     private Vector2 inputDirection;
 
     // This variable is used to mark the direction the player is facing
-    private bool isFacingRight;
+    [HideInInspector]
+    public bool isFacingRight;
 
 
     // Variables used to allow a jump to be queued slightly before hitting the floor
@@ -78,6 +79,13 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     // This variable stores where the player is currently pointing
     private Vector3 currentDirection3D;
+
+
+    // This is a get function for MaximumHorizontalSpeedFromPower
+    public float GetMaximumHorizontalSpeedFromPower()
+    {
+        return MaximumHorizontalSpeedFromPower;
+    }
 
 
     // Start is called before the first frame update
@@ -262,7 +270,6 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
             }
         }
     }
-
     private bool isJumping()
     {
         float currentVerticalVelocity = entityRigidBody.velocity.y;

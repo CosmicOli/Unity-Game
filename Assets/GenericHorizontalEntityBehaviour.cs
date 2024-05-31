@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GenericHorizontalHorizontalEntityBehaviour : GenericEntityBehaviour
+public class GenericHorizontalEntityBehaviour : GenericEntityBehaviour
 {
     // These constants define an entities drag, acceleration and maximum speed from it's own acceleration in the horizontal axis
     [SerializeField]
