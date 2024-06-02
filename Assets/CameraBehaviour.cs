@@ -17,11 +17,17 @@ public class CameraBehaviour : MonoBehaviour
 
     public float CameraLag;
 
-    public float horizontalVelocityTimer;
+    private float horizontalVelocityTimer;
+    private float HorizontalVelocityTimerMaximum = 0.2f;
 
-    private float horizontalVelocityTimerMaximum = 0.2f;
+    private bool changingDirection;
+    private float changingDirectionTimer;
+    private float ChangingDirectionTimerMaximum = 0.2f;
+    private float changingDirectionLag;
 
-    bool currentlyFixed;
+    private bool currentlyFixed;
+    
+    private bool previouslyFacingRight;
 
     // Start is called before the first frame update
     void Start()
@@ -29,6 +35,8 @@ public class CameraBehaviour : MonoBehaviour
         playerGameObject = GameObject.FindGameObjectWithTag("Player");
         playerBehaviour = playerGameObject.GetComponent<PlayerBehaviour>();
         playerRigidBody = playerGameObject.GetComponent<Rigidbody2D>();
+
+        previouslyFacingRight = playerBehaviour.isFacingRight;
     }
 
     // Update is called once per frame
@@ -50,9 +58,9 @@ public class CameraBehaviour : MonoBehaviour
             {
                 horizontalVelocityTimer += Time.deltaTime;
 
-                if (horizontalVelocityTimer > horizontalVelocityTimerMaximum)
+                if (horizontalVelocityTimer > HorizontalVelocityTimerMaximum)
                 {
-                  horizontalVelocityTimer = horizontalVelocityTimerMaximum;
+                  horizontalVelocityTimer = HorizontalVelocityTimerMaximum;
                 }
             }
             else
@@ -65,9 +73,40 @@ public class CameraBehaviour : MonoBehaviour
                 }
             }
 
-            // If direction change reset timer?
 
-            cameraPosition.x = TrackObjectInAxis(cameraPosition.x, PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
+            bool currentlyFacingRight = playerBehaviour.isFacingRight;
+            float turnAroundOffset = 0;
+
+            // If still moving in the same direction
+            if (currentlyFacingRight == previouslyFacingRight)
+            {
+                if (changingDirection)
+                {
+                    changingDirectionTimer += Time.deltaTime;
+
+                    Debug.Log(RelativePosition.x);
+
+                    if (changingDirectionTimer > 0)
+                    {
+                        changingDirection = false;
+                        changingDirectionTimer = 0;
+                    }
+
+                    turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
+                }
+            }
+            else
+            {
+                previouslyFacingRight = currentlyFacingRight;
+                changingDirectionLag = RelativePosition.x;
+
+                changingDirection = true;
+                changingDirectionTimer = -1 * ChangingDirectionTimerMaximum;
+            }
+
+            cameraPosition.x = TrackObjectHorizontally(cameraPosition.x, PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
+            cameraPosition.x += turnAroundOffset;
+
 
             float CameraHeight = Camera.orthographicSize;
             float CameraWidth = Camera.orthographicSize * 16 / 9;
@@ -141,10 +180,10 @@ public class CameraBehaviour : MonoBehaviour
         return BoundDirection.y * Mathf.Infinity;
     }
 
-    private float TrackObjectInAxis(float cameraAxisPosition, float PlayerAxisPosition, float AxisVelocityTimer, float AxisVelocity)
+    private float TrackObjectHorizontally(float horizontalCameraPosition, float HorizontalPlayerPosition, float HorizontalVelocityTimer, float HorizontalVelocity)
     {
         float direction;
-        if (playerBehaviour.isFacingRight)
+        if (previouslyFacingRight)
         {
             direction = 1;
         }
@@ -156,16 +195,17 @@ public class CameraBehaviour : MonoBehaviour
         float timeFactor = 0;
         if (horizontalVelocityTimer > 0)
         {
+            // I want to change speedFactor to be non linear
+            // Or I may want to return to return to 0 slower than usual
             float speedFactor = 0;
-            if (Mathf.Abs(AxisVelocity) > 5)
+            if (Mathf.Abs(HorizontalVelocity) > 5)
             {
-                speedFactor = (AxisVelocity - direction * 5) / 5;
+                speedFactor = (HorizontalVelocity - direction * 5) / 5;
             }
 
-            Func<float, float> LinearCurve = n => (CameraLag + direction * speedFactor) * n / horizontalVelocityTimerMaximum;
-            timeFactor = direction * LinearCurve(AxisVelocityTimer);
-
-            Debug.Log(speedFactor);
+            // May want to remove the linear curve as a seperate variable
+            Func<float, float> LinearCurve = n => (CameraLag + direction * speedFactor) * n / HorizontalVelocityTimerMaximum;
+            timeFactor = direction * LinearCurve(HorizontalVelocityTimer);
 
             if (Mathf.Abs(timeFactor) >= CameraLag + direction * speedFactor)
             {
@@ -175,9 +215,9 @@ public class CameraBehaviour : MonoBehaviour
 
         float defaultRelativePlayerAxisPosition = direction * CameraLag;
 
-        cameraAxisPosition = PlayerAxisPosition + defaultRelativePlayerAxisPosition - timeFactor;
+        horizontalCameraPosition = HorizontalPlayerPosition + defaultRelativePlayerAxisPosition - timeFactor;
 
-        return cameraAxisPosition;                                                                                                                                                          
+        return horizontalCameraPosition;                                                                                         
     }
 
     public void FixCamera(Vector2 position)
