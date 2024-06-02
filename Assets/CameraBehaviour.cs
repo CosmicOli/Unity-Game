@@ -45,10 +45,10 @@ public class CameraBehaviour : MonoBehaviour
         // If not currently fixed, trail the player
         if (!currentlyFixed)
         {
-            float topBound = Mathf.Infinity;
-            float bottomBound = Mathf.NegativeInfinity;
-            float leftBound = Mathf.NegativeInfinity;
-            float rightBound = Mathf.Infinity;
+            float topBound;
+            float bottomBound;
+            float leftBound;
+            float rightBound;
 
             Vector3 cameraPosition = gameObject.transform.position;
             Vector2 PlayerPosition = playerGameObject.transform.position;
@@ -73,7 +73,7 @@ public class CameraBehaviour : MonoBehaviour
                 }
             }
 
-            cameraPosition.x = TrackObjectHorizontally(cameraPosition.x, PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
+            cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
 
             float CameraHeight = Camera.orthographicSize;
             float CameraWidth = Camera.orthographicSize * 16 / 9;
@@ -109,7 +109,7 @@ public class CameraBehaviour : MonoBehaviour
                 cameraPosition.y = topBound - CameraHeight;
             }
 
-            if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(rightBound) != Mathf.Infinity)
+            if (Mathf.Abs(leftBound) == Mathf.Infinity && Mathf.Abs(rightBound) == Mathf.Infinity)
             {
                 bool currentlyFacingRight = playerBehaviour.isFacingRight;
                 float turnAroundOffset = 0;
@@ -126,10 +126,12 @@ public class CameraBehaviour : MonoBehaviour
                             changingDirection = false;
                             changingDirectionTimer = 0;
                         }
-
+                        
                         turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
                     }
                 }
+                // Otherwise update which way is being faced and set the timer to the maximum
+                // Note that the timer is actually set negative and counts up; this is as the offset should return to 0 instead of start at 0
                 else
                 {
                     previouslyFacingRight = currentlyFacingRight;
@@ -180,7 +182,7 @@ public class CameraBehaviour : MonoBehaviour
         return BoundDirection.y * Mathf.Infinity;
     }
 
-    private float TrackObjectHorizontally(float horizontalCameraPosition, float HorizontalPlayerPosition, float HorizontalVelocityTimer, float HorizontalVelocity)
+    private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocityTimer, float HorizontalVelocity)
     {
         float direction;
         if (previouslyFacingRight)
@@ -213,7 +215,7 @@ public class CameraBehaviour : MonoBehaviour
 
         float defaultRelativePlayerAxisPosition = direction * CameraLag;
 
-        horizontalCameraPosition = HorizontalPlayerPosition + defaultRelativePlayerAxisPosition - timeFactor;
+        float horizontalCameraPosition = HorizontalPlayerPosition + defaultRelativePlayerAxisPosition - timeFactor;
 
         return horizontalCameraPosition;                                                                                         
     }
