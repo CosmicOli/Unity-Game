@@ -42,6 +42,20 @@ public class CameraBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /*if (playerRigidBody.velocity.x > 0 && playerRigidBody.velocity.x != 0)
+        {
+            direction = 1;
+        }
+        else if (playerRigidBody.velocity.x != 0)
+        {
+            direction = -1;
+        }
+        else
+        {
+            direction = 0;
+        }*/
+
+
         // If not currently fixed, trail the player
         if (!currentlyFixed)
         {
@@ -109,40 +123,40 @@ public class CameraBehaviour : MonoBehaviour
                 cameraPosition.y = topBound - CameraHeight;
             }
 
-            if (Mathf.Abs(leftBound) == Mathf.Infinity && Mathf.Abs(rightBound) == Mathf.Infinity)
+            bool currentlyFacingRight = playerBehaviour.isFacingRight;
+            float turnAroundOffset = 0;
+
+            // If still moving in the same direction
+            if (currentlyFacingRight == previouslyFacingRight)
             {
-                bool currentlyFacingRight = playerBehaviour.isFacingRight;
-                float turnAroundOffset = 0;
-
-                // If still moving in the same direction
-                if (currentlyFacingRight == previouslyFacingRight)
+                if (changingDirection)
                 {
-                    if (changingDirection)
-                    {
-                        changingDirectionTimer += Time.deltaTime;
+                    changingDirectionTimer += Time.deltaTime;
 
-                        if (changingDirectionTimer > 0)
-                        {
-                            changingDirection = false;
-                            changingDirectionTimer = 0;
-                        }
-                        
+                    if (changingDirectionTimer > 0)
+                    {
+                        changingDirection = false;
+                        changingDirectionTimer = 0;
+                    }
+
+                    if (Mathf.Abs(leftBound) == Mathf.Infinity && Mathf.Abs(rightBound) == Mathf.Infinity)
+                    {
                         turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
                     }
                 }
-                // Otherwise update which way is being faced and set the timer to the maximum
-                // Note that the timer is actually set negative and counts up; this is as the offset should return to 0 instead of start at 0
-                else
-                {
-                    previouslyFacingRight = currentlyFacingRight;
-                    changingDirectionLag = RelativePosition.x;
-
-                    changingDirection = true;
-                    changingDirectionTimer = -1 * ChangingDirectionTimerMaximum;
-                }
-
-                cameraPosition.x += turnAroundOffset;
             }
+            // Otherwise update which way is being faced and set the timer to the maximum
+            // Note that the timer is actually set negative and counts up; this is as the offset should return to 0 instead of start at 0
+            else
+            {
+                previouslyFacingRight = currentlyFacingRight;
+                changingDirectionLag = RelativePosition.x;
+
+                changingDirection = true;
+                changingDirectionTimer = -1 * ChangingDirectionTimerMaximum;
+            }
+
+            cameraPosition.x += turnAroundOffset;
 
             gameObject.transform.position = cameraPosition;
         }
@@ -184,12 +198,8 @@ public class CameraBehaviour : MonoBehaviour
 
     private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocityTimer, float HorizontalVelocity)
     {
-        float direction;
-        if (previouslyFacingRight)
-        {
-            direction = 1;
-        }
-        else
+        float direction = 1;
+        if (playerRigidBody.velocity.x < 0)
         {
             direction = -1;
         }
