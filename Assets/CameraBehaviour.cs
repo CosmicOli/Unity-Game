@@ -73,48 +73,15 @@ public class CameraBehaviour : MonoBehaviour
                 }
             }
 
-
-            bool currentlyFacingRight = playerBehaviour.isFacingRight;
-            float turnAroundOffset = 0;
-
-            // If still moving in the same direction
-            if (currentlyFacingRight == previouslyFacingRight)
-            {
-                if (changingDirection)
-                {
-                    changingDirectionTimer += Time.deltaTime;
-
-                    Debug.Log(RelativePosition.x);
-
-                    if (changingDirectionTimer > 0)
-                    {
-                        changingDirection = false;
-                        changingDirectionTimer = 0;
-                    }
-
-                    turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
-                }
-            }
-            else
-            {
-                previouslyFacingRight = currentlyFacingRight;
-                changingDirectionLag = RelativePosition.x;
-
-                changingDirection = true;
-                changingDirectionTimer = -1 * ChangingDirectionTimerMaximum;
-            }
-
             cameraPosition.x = TrackObjectHorizontally(cameraPosition.x, PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
-            cameraPosition.x += turnAroundOffset;
-
 
             float CameraHeight = Camera.orthographicSize;
             float CameraWidth = Camera.orthographicSize * 16 / 9;
 
-            topBound = CalculateVerticalCameraBound(Vector2.up, CameraHeight);
-            bottomBound = CalculateVerticalCameraBound(Vector2.down, CameraHeight);
-            leftBound = CalculateHorizontalCameraBound(Vector2.left, CameraWidth);
-            rightBound = CalculateHorizontalCameraBound(Vector2.right, CameraWidth);
+            topBound = CalculateVerticalCameraBound(Vector2.up, CameraHeight, cameraPosition);
+            bottomBound = CalculateVerticalCameraBound(Vector2.down, CameraHeight, cameraPosition);
+            leftBound = CalculateHorizontalCameraBound(Vector2.left, CameraWidth, cameraPosition);
+            rightBound = CalculateHorizontalCameraBound(Vector2.right, CameraWidth, cameraPosition);
 
             if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(rightBound) != Mathf.Infinity)
             {
@@ -142,13 +109,46 @@ public class CameraBehaviour : MonoBehaviour
                 cameraPosition.y = topBound - CameraHeight;
             }
 
+            if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(rightBound) != Mathf.Infinity)
+            {
+                bool currentlyFacingRight = playerBehaviour.isFacingRight;
+                float turnAroundOffset = 0;
+
+                // If still moving in the same direction
+                if (currentlyFacingRight == previouslyFacingRight)
+                {
+                    if (changingDirection)
+                    {
+                        changingDirectionTimer += Time.deltaTime;
+
+                        if (changingDirectionTimer > 0)
+                        {
+                            changingDirection = false;
+                            changingDirectionTimer = 0;
+                        }
+
+                        turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
+                    }
+                }
+                else
+                {
+                    previouslyFacingRight = currentlyFacingRight;
+                    changingDirectionLag = RelativePosition.x;
+
+                    changingDirection = true;
+                    changingDirectionTimer = -1 * ChangingDirectionTimerMaximum;
+                }
+
+                cameraPosition.x += turnAroundOffset;
+            }
+
             gameObject.transform.position = cameraPosition;
         }
     }
 
-    private float CalculateHorizontalCameraBound(Vector2 BoundDirection, float CameraWidth)
+    private float CalculateHorizontalCameraBound(Vector2 BoundDirection, float CameraWidth, Vector2 CameraPosition)
     {
-        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(playerGameObject.transform.position, BoundDirection, CameraWidth, LayerMask.GetMask("Floors and Walls"));
+        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(CameraPosition, BoundDirection, CameraWidth, LayerMask.GetMask("Floors and Walls"));
 
         foreach (RaycastHit2D hitObject in hitObjects)
         {
@@ -163,9 +163,9 @@ public class CameraBehaviour : MonoBehaviour
         return BoundDirection.x * Mathf.Infinity;
     }
 
-    private float CalculateVerticalCameraBound(Vector2 BoundDirection, float CameraHeight)
+    private float CalculateVerticalCameraBound(Vector2 BoundDirection, float CameraHeight, Vector2 CameraPosition)
     {
-        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(playerGameObject.transform.position, BoundDirection, CameraHeight, LayerMask.GetMask("Floors and Walls"));
+        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(CameraPosition, BoundDirection, CameraHeight, LayerMask.GetMask("Floors and Walls"));
 
         foreach (RaycastHit2D hitObject in hitObjects)
         {
@@ -203,9 +203,7 @@ public class CameraBehaviour : MonoBehaviour
                 speedFactor = (HorizontalVelocity - direction * 5) / 5;
             }
 
-            // May want to remove the linear curve as a seperate variable
-            Func<float, float> LinearCurve = n => (CameraLag + direction * speedFactor) * n / HorizontalVelocityTimerMaximum;
-            timeFactor = direction * LinearCurve(HorizontalVelocityTimer);
+            timeFactor = (direction * CameraLag + speedFactor) * HorizontalVelocityTimer / HorizontalVelocityTimerMaximum;
 
             if (Mathf.Abs(timeFactor) >= CameraLag + direction * speedFactor)
             {
