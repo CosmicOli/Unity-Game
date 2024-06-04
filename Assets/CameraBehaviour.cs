@@ -29,6 +29,8 @@ public class CameraBehaviour : MonoBehaviour
     
     private bool previouslyFacingRight;
 
+    private float previousHorizontalPosition = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,25 +39,13 @@ public class CameraBehaviour : MonoBehaviour
         playerRigidBody = playerGameObject.GetComponent<Rigidbody2D>();
 
         previouslyFacingRight = playerBehaviour.isFacingRight;
+
+        previousHorizontalPosition = gameObject.transform.position.x;
     }
 
     // Update is called once per frame
     void Update()
     {
-        /*if (playerRigidBody.velocity.x > 0 && playerRigidBody.velocity.x != 0)
-        {
-            direction = 1;
-        }
-        else if (playerRigidBody.velocity.x != 0)
-        {
-            direction = -1;
-        }
-        else
-        {
-            direction = 0;
-        }*/
-
-
         // If not currently fixed, trail the player
         if (!currentlyFixed)
         {
@@ -139,7 +129,7 @@ public class CameraBehaviour : MonoBehaviour
                         changingDirectionTimer = 0;
                     }
 
-                    if (Mathf.Abs(leftBound) == Mathf.Infinity && Mathf.Abs(rightBound) == Mathf.Infinity)
+                    if ((Mathf.Abs(leftBound) == Mathf.Infinity || Mathf.Abs(leftBound) > Mathf.Abs(cameraPosition.x - CameraWidth)) && (Mathf.Abs(rightBound) == Mathf.Infinity || Mathf.Abs(rightBound) > Mathf.Abs(cameraPosition.x + CameraWidth)))
                     {
                         turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
                     }
@@ -198,10 +188,25 @@ public class CameraBehaviour : MonoBehaviour
 
     private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocityTimer, float HorizontalVelocity)
     {
-        float direction = 1;
-        if (playerRigidBody.velocity.x < 0)
+        float direction;
+        if (playerRigidBody.velocity.x > 0)
+        {
+            direction = 1;
+        }
+        else if (playerRigidBody.velocity.x < 0)
         {
             direction = -1;
+        }
+        else
+        {
+            if (previouslyFacingRight)
+            {
+                direction = 1;
+            }
+            else
+            {
+                direction = -1;
+            }
         }
 
         float timeFactor = 0;
