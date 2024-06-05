@@ -15,25 +15,36 @@ public class CameraBehaviour : MonoBehaviour
 
     public Camera Camera;
 
+    // This constant defines the offset the player should have from the camera when not moving
     public float CameraLag;
 
+
+    // This variable times how long since horizontal input is detected
+    // It doesn't reset to 0 immediately but goes down at the same rate as it goes up
     private float horizontalVelocityTimer;
+    
+    // This constant defines the cap of horizontalVelocityTimer
+    // This defines how long it takes to go from 0 to maximum offset
     private float HorizontalVelocityTimerMaximum = 0.2f;
 
+
+    // These variables define whether the player is changing direction, how long it has been starting to change, and where the camera is aiming to get to while turning around
     private bool changingDirection;
     private float changingDirectionTimer;
+    private float changingDirectionTarget;
+
+    // This constant defines the cap of changingDirectionTimer
+    // This defines how long it takes to change the camera position
     private float ChangingDirectionTimerMaximum = 0.2f;
-    private float changingDirectionLag;
 
-    private bool changingDirectionOnWrongSide = false;
 
+    // This variable defines whether the camera is fixed
     private bool currentlyFixed;
     
+
+    // This variable defines whether the player was facing right in the previous frame
     private bool previouslyFacingRight;
 
-    private float previousHorizontalPosition = 0;
-
-    float maxTurnAroundOffset = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -43,8 +54,6 @@ public class CameraBehaviour : MonoBehaviour
         playerRigidBody = playerGameObject.GetComponent<Rigidbody2D>();
 
         previouslyFacingRight = playerBehaviour.isFacingRight;
-
-        previousHorizontalPosition = gameObject.transform.position.x;
     }
 
     // Update is called once per frame
@@ -62,29 +71,30 @@ public class CameraBehaviour : MonoBehaviour
             Vector2 PlayerPosition = playerGameObject.transform.position;
             Vector2 RelativePosition = playerGameObject.transform.position - cameraPosition;
 
-            Debug.Log(RelativePosition.x);
-
+            // If currently moving horizontally, increase the timer
             if (Mathf.Abs(playerRigidBody.velocity.x) > 0)
             {
                 horizontalVelocityTimer += Time.deltaTime;
 
+                // If the timer reaches the limit, cap it
                 if (horizontalVelocityTimer > HorizontalVelocityTimerMaximum)
                 {
                   horizontalVelocityTimer = HorizontalVelocityTimerMaximum;
                 }
             }
+            // If not currently moving horizontally, reduce the timer
             else
             {
                 horizontalVelocityTimer -= Time.deltaTime;
 
+                // If the timer reaches 0, cap it
                 if (horizontalVelocityTimer < 0)
                 {
                     horizontalVelocityTimer = 0;
                 }
             }
 
-            //cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
-            cameraPosition.x = PlayerPosition.x;
+            cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, playerRigidBody.velocity.x);
 
             float CameraHeight = Camera.orthographicSize;
             float CameraWidth = Camera.orthographicSize * 16 / 9;
@@ -119,17 +129,6 @@ public class CameraBehaviour : MonoBehaviour
             {
                 cameraPosition.y = topBound - CameraHeight;
             }
-
-            bool currentlyFacingRight = playerBehaviour.isFacingRight;
-
-            if (currentlyFacingRight != previouslyFacingRight)
-            {
-                previouslyFacingRight = currentlyFacingRight;
-            }
-
-            float turnAroundOffset = 0;
-            cameraPosition.x += turnAroundOffset;
-
 
             gameObject.transform.position = cameraPosition;
         }
@@ -169,8 +168,9 @@ public class CameraBehaviour : MonoBehaviour
         return BoundDirection.y * Mathf.Infinity;
     }
 
-    private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocityTimer, float HorizontalVelocity)
+    private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocity)
     {
+        // Calculate the direction
         float direction;
         if (playerRigidBody.velocity.x > 0)
         {
@@ -192,28 +192,72 @@ public class CameraBehaviour : MonoBehaviour
             }
         }
 
-        float timeFactor = 0;
-        if (horizontalVelocityTimer > 0)
+        bool currentlyFacingRight = playerBehaviour.isFacingRight;
+        float horizontalCameraPosition;
+
+        // If still moving in the same direction
+        if (currentlyFacingRight == previouslyFacingRight)
         {
-            // I want to change speedFactor to be non linear
-            // Or I may want to return to return to 0 slower than usual
-            float speedFactor = 0;
-            if (Mathf.Abs(HorizontalVelocity) > 5)
+            float timeFactor = 0;
+            if (horizontalVelocityTimer > 0)
             {
-                speedFactor = (HorizontalVelocity - direction * 5) / 5;
+                // I want to change speedFactor to be non linear
+                // Or I may want to return to return to 0 slower than usual
+                float speedFactor = 0;
+                if (Mathf.Abs(HorizontalVelocity) > 5)
+                {
+                    speedFactor = (HorizontalVelocity - direction * 5) / 5;
+                }
+
+                timeFactor = (direction * CameraLag + speedFactor) * horizontalVelocityTimer / HorizontalVelocityTimerMaximum;
+
+                if (Mathf.Abs(timeFactor) >= CameraLag + direction * speedFactor)
+                {
+                    timeFactor = Mathf.Sign(timeFactor) * (CameraLag + direction * speedFactor);
+                }
             }
 
-            timeFactor = (direction * CameraLag + speedFactor) * HorizontalVelocityTimer / HorizontalVelocityTimerMaximum;
-
-            if (Mathf.Abs(timeFactor) >= CameraLag + direction * speedFactor)
+            // If changing direction
+            if (changingDirection)
             {
-                timeFactor = Mathf.Sign(timeFactor) * (CameraLag + direction * speedFactor);
+                // Update the changing direction timer
+                changingDirectionTimer += Time.deltaTime;
+
+                // If reached the maximum, cap the timer
+                if (changingDirectionTimer > ChangingDirectionTimerMaximum)
+                {
+                    changingDirection = false;
+                    changingDirectionTimer = ChangingDirectionTimerMaximum;
+                }
+
+                // Coming from: gameObject.transform.position.x;
+                float changingDirectionOrigin = gameObject.transform.position.x;
+
+                // Going to: changingDirectionLag = playerGameObject.transform.position.x + direction * CameraLag;
+                changingDirectionTarget = HorizontalPlayerPosition + direction * CameraLag - timeFactor;
+
+                // Smoothly transition between coming from and going to
+                // Coming from + gradient * time
+                horizontalCameraPosition = changingDirectionOrigin + changingDirectionTimer * (changingDirectionTarget - changingDirectionOrigin) / (ChangingDirectionTimerMaximum);
+            }
+            // Otherwise if not, position as usual using the time factor offset
+            else
+            {
+                horizontalCameraPosition = HorizontalPlayerPosition + direction * CameraLag - timeFactor;
             }
         }
+        // Otherwise update which way is being faced and set the timer to the maximum
+        // Note that the timer is actually set negative and counts up; this is as the offset should return to 0 instead of start at 0
+        else
+        {
+            previouslyFacingRight = currentlyFacingRight;
 
-        float defaultRelativePlayerAxisPosition = direction * CameraLag;
+            changingDirection = true;
+            changingDirectionTimer = 0;
+            changingDirectionTarget = playerGameObject.transform.position.x + direction * CameraLag;
 
-        float horizontalCameraPosition = HorizontalPlayerPosition + defaultRelativePlayerAxisPosition - timeFactor;
+            horizontalCameraPosition = gameObject.transform.position.x;
+        }
 
         return horizontalCameraPosition;                                                                                         
     }
