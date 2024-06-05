@@ -25,11 +25,15 @@ public class CameraBehaviour : MonoBehaviour
     private float ChangingDirectionTimerMaximum = 0.2f;
     private float changingDirectionLag;
 
+    private bool changingDirectionOnWrongSide = false;
+
     private bool currentlyFixed;
     
     private bool previouslyFacingRight;
 
     private float previousHorizontalPosition = 0;
+
+    float maxTurnAroundOffset = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -44,7 +48,7 @@ public class CameraBehaviour : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
         // If not currently fixed, trail the player
         if (!currentlyFixed)
@@ -57,6 +61,8 @@ public class CameraBehaviour : MonoBehaviour
             Vector3 cameraPosition = gameObject.transform.position;
             Vector2 PlayerPosition = playerGameObject.transform.position;
             Vector2 RelativePosition = playerGameObject.transform.position - cameraPosition;
+
+            Debug.Log(RelativePosition.x);
 
             if (Mathf.Abs(playerRigidBody.velocity.x) > 0)
             {
@@ -77,7 +83,8 @@ public class CameraBehaviour : MonoBehaviour
                 }
             }
 
-            cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
+            //cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, horizontalVelocityTimer, playerRigidBody.velocity.x);
+            cameraPosition.x = PlayerPosition.x;
 
             float CameraHeight = Camera.orthographicSize;
             float CameraWidth = Camera.orthographicSize * 16 / 9;
@@ -114,39 +121,15 @@ public class CameraBehaviour : MonoBehaviour
             }
 
             bool currentlyFacingRight = playerBehaviour.isFacingRight;
-            float turnAroundOffset = 0;
 
-            // If still moving in the same direction
-            if (currentlyFacingRight == previouslyFacingRight)
-            {
-                if (changingDirection)
-                {
-                    changingDirectionTimer += Time.deltaTime;
-
-                    if (changingDirectionTimer > 0)
-                    {
-                        changingDirection = false;
-                        changingDirectionTimer = 0;
-                    }
-
-                    if ((Mathf.Abs(leftBound) == Mathf.Infinity || Mathf.Abs(leftBound) > Mathf.Abs(cameraPosition.x - CameraWidth)) && (Mathf.Abs(rightBound) == Mathf.Infinity || Mathf.Abs(rightBound) > Mathf.Abs(cameraPosition.x + CameraWidth)))
-                    {
-                        turnAroundOffset = changingDirectionTimer * 2 * changingDirectionLag / ChangingDirectionTimerMaximum;
-                    }
-                }
-            }
-            // Otherwise update which way is being faced and set the timer to the maximum
-            // Note that the timer is actually set negative and counts up; this is as the offset should return to 0 instead of start at 0
-            else
+            if (currentlyFacingRight != previouslyFacingRight)
             {
                 previouslyFacingRight = currentlyFacingRight;
-                changingDirectionLag = RelativePosition.x;
-
-                changingDirection = true;
-                changingDirectionTimer = -1 * ChangingDirectionTimerMaximum;
             }
 
+            float turnAroundOffset = 0;
             cameraPosition.x += turnAroundOffset;
+
 
             gameObject.transform.position = cameraPosition;
         }
