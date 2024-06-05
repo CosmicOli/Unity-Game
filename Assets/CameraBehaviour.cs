@@ -9,10 +9,12 @@ using UnityEngine.AI;
 
 public class CameraBehaviour : MonoBehaviour
 {
+    // These variables are references to the player and their properties
     PlayerBehaviour playerBehaviour;
     GameObject playerGameObject;
     Rigidbody2D playerRigidBody;
 
+    // This constant refers to the camera component of this game object
     public Camera Camera;
 
     // This constant defines the offset the player should have from the camera when not moving
@@ -50,10 +52,12 @@ public class CameraBehaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Defining the references to the player 
         playerGameObject = GameObject.FindGameObjectWithTag("Player");
         playerBehaviour = playerGameObject.GetComponent<PlayerBehaviour>();
         playerRigidBody = playerGameObject.GetComponent<Rigidbody2D>();
 
+        // First assigning whether the player is facing right
         previouslyFacingRight = playerBehaviour.isFacingRight;
     }
 
@@ -63,14 +67,15 @@ public class CameraBehaviour : MonoBehaviour
         // If not currently fixed, trail the player
         if (!currentlyFixed)
         {
+            // Creating the camera bounds
             float topBound;
             float bottomBound;
             float leftBound;
             float rightBound;
 
+            // Defining the key object positions
             Vector3 cameraPosition = gameObject.transform.position;
             Vector2 PlayerPosition = playerGameObject.transform.position;
-            Vector2 RelativePosition = playerGameObject.transform.position - cameraPosition;
 
             // If currently moving horizontally, increase the timer
             if (Mathf.Abs(playerRigidBody.velocity.x) > 0)
@@ -95,16 +100,21 @@ public class CameraBehaviour : MonoBehaviour
                 }
             }
 
+            // Track the player horizontally and assign the camera x position
             cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, playerRigidBody.velocity.x);
+            //cameraPosition.y = PlayerPosition.y;
 
+            // Defining the height and width of the camera
             float CameraHeight = Camera.orthographicSize;
             float CameraWidth = Camera.orthographicSize * 16 / 9;
 
-            topBound = CalculateVerticalCameraBound(Vector2.up, CameraHeight, cameraPosition);
-            bottomBound = CalculateVerticalCameraBound(Vector2.down, CameraHeight, cameraPosition);
-            leftBound = CalculateHorizontalCameraBound(Vector2.left, CameraWidth, cameraPosition);
-            rightBound = CalculateHorizontalCameraBound(Vector2.right, CameraWidth, cameraPosition);
+            // Finding the camera bounds
+            topBound = CalculateVerticalCameraBound(1, CameraHeight, cameraPosition);
+            bottomBound = CalculateVerticalCameraBound(-1, CameraHeight, cameraPosition);
+            leftBound = CalculateHorizontalCameraBound(-1, CameraWidth, cameraPosition);
+            rightBound = CalculateHorizontalCameraBound(1, CameraWidth, cameraPosition);
 
+            // If the horizontal bounds are closer than the horizontal size of the camera, bound the camera
             if (Mathf.Abs(leftBound) != Mathf.Infinity && Mathf.Abs(rightBound) != Mathf.Infinity)
             {
                 cameraPosition.x = (leftBound + rightBound) / 2;
@@ -118,6 +128,7 @@ public class CameraBehaviour : MonoBehaviour
                 cameraPosition.x = rightBound - CameraWidth;
             }
 
+            // If the vertical bounds are closer than the horizontal size of the camera, bound the camera
             if (Mathf.Abs(bottomBound) != Mathf.Infinity && Mathf.Abs(topBound) != Mathf.Infinity)
             {
                 cameraPosition.y = (bottomBound + topBound) / 2;
@@ -131,42 +142,9 @@ public class CameraBehaviour : MonoBehaviour
                 cameraPosition.y = topBound - CameraHeight;
             }
 
+            // Reassign the camera position to be the newly calculated position
             gameObject.transform.position = cameraPosition;
         }
-    }
-
-    private float CalculateHorizontalCameraBound(Vector2 BoundDirection, float CameraWidth, Vector2 CameraPosition)
-    {
-        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(CameraPosition, BoundDirection, CameraWidth, LayerMask.GetMask("Floors and Walls"));
-
-        foreach (RaycastHit2D hitObject in hitObjects)
-        {
-            GenericEnvironmentBehaviour HitObjectBehaviour = hitObject.collider.gameObject.GetComponent<GenericEnvironmentBehaviour>();
-
-            if (HitObjectBehaviour.HorizontalCameraBounding)
-            {
-                return (hitObject.transform.position.x + HitObjectBehaviour.RelativeHorizontalCameraBounding);
-            }
-        }
-
-        return BoundDirection.x * Mathf.Infinity;
-    }
-
-    private float CalculateVerticalCameraBound(Vector2 BoundDirection, float CameraHeight, Vector2 CameraPosition)
-    {
-        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(CameraPosition, BoundDirection, CameraHeight, LayerMask.GetMask("Floors and Walls"));
-
-        foreach (RaycastHit2D hitObject in hitObjects)
-        {
-            GenericEnvironmentBehaviour HitObjectBehaviour = hitObject.collider.gameObject.GetComponent<GenericEnvironmentBehaviour>();
-
-            if (HitObjectBehaviour.VerticalCameraBounding)
-            {
-                return (hitObject.transform.position.y + HitObjectBehaviour.RelativeVerticalCameraBounding);
-            }
-        }
-
-        return BoundDirection.y * Mathf.Infinity;
     }
 
     private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocity)
@@ -240,7 +218,7 @@ public class CameraBehaviour : MonoBehaviour
                 // Smoothly transition between coming from and going to
                 // Coming from origin + gradient * time
                 horizontalCameraPosition = ChangingDirectionOrigin + changingDirectionTimer * (changingDirectionTarget - ChangingDirectionOrigin) / (ChangingDirectionTimerMaximum);
-            }   
+            }
             // Otherwise if not, position as usual using the time factor offset
             else
             {
@@ -261,7 +239,44 @@ public class CameraBehaviour : MonoBehaviour
             horizontalCameraPosition = gameObject.transform.position.x;
         }
 
-        return horizontalCameraPosition;                                                                                         
+        return horizontalCameraPosition;
+    }
+
+    private float CalculateHorizontalCameraBound(float BoundDirection, float CameraWidth, Vector2 CameraPosition)
+    {
+        // Find all objects along the camera's axis within it's view
+        RaycastHit2D[] HitObjects = Physics2D.RaycastAll(CameraPosition, new Vector2(BoundDirection, 0), CameraWidth, LayerMask.GetMask("Floors and Walls"));
+
+        foreach (RaycastHit2D hitObject in HitObjects)
+        {
+            GenericEnvironmentBehaviour HitObjectBehaviour = hitObject.collider.gameObject.GetComponent<GenericEnvironmentBehaviour>();
+
+            // If the bound exists, return it
+            if (HitObjectBehaviour.HorizontalCameraBounding)
+            {
+                return (hitObject.transform.position.x + HitObjectBehaviour.RelativeHorizontalCameraBounding);
+            }
+        }
+
+        return BoundDirection * Mathf.Infinity;
+    }
+
+    private float CalculateVerticalCameraBound(float BoundDirection, float CameraHeight, Vector2 CameraPosition)
+    {
+        RaycastHit2D[] hitObjects = Physics2D.RaycastAll(CameraPosition, new Vector2(0, BoundDirection), CameraHeight, LayerMask.GetMask("Floors and Walls"));
+
+        foreach (RaycastHit2D hitObject in hitObjects)
+        {
+            GenericEnvironmentBehaviour HitObjectBehaviour = hitObject.collider.gameObject.GetComponent<GenericEnvironmentBehaviour>();
+
+            // If the bound exists, return it
+            if (HitObjectBehaviour.VerticalCameraBounding)
+            {
+                return (hitObject.transform.position.y + HitObjectBehaviour.RelativeVerticalCameraBounding);
+            }
+        }
+
+        return BoundDirection * Mathf.Infinity;
     }
 
     public void FixCamera(Vector2 position)
