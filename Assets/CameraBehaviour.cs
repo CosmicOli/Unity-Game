@@ -28,9 +28,10 @@ public class CameraBehaviour : MonoBehaviour
     private float HorizontalVelocityTimerMaximum = 0.2f;
 
 
-    // These variables define whether the player is changing direction, how long it has been starting to change, and where the camera is aiming to get to while turning around
+    // These variables define whether the player is changing direction, how long it has been starting to change, and where the camera is coming from and aiming to get to while turning around
     private bool changingDirection;
     private float changingDirectionTimer;
+    private float changingDirectionRelativeOrigin;
     private float changingDirectionTarget;
 
     // This constant defines the cap of changingDirectionTimer
@@ -230,16 +231,16 @@ public class CameraBehaviour : MonoBehaviour
                     changingDirectionTimer = ChangingDirectionTimerMaximum;
                 }
 
-                // Coming from: gameObject.transform.position.x;
-                float changingDirectionOrigin = gameObject.transform.position.x;
+                // Coming from: The player position plus the starting offset
+                float ChangingDirectionOrigin = HorizontalPlayerPosition + changingDirectionRelativeOrigin;
 
-                // Going to: changingDirectionLag = playerGameObject.transform.position.x + direction * CameraLag;
+                // Going to: The player position plus the ending offset
                 changingDirectionTarget = HorizontalPlayerPosition + direction * CameraLag - timeFactor;
 
                 // Smoothly transition between coming from and going to
-                // Coming from + gradient * time
-                horizontalCameraPosition = changingDirectionOrigin + changingDirectionTimer * (changingDirectionTarget - changingDirectionOrigin) / (ChangingDirectionTimerMaximum);
-            }
+                // Coming from origin + gradient * time
+                horizontalCameraPosition = ChangingDirectionOrigin + changingDirectionTimer * (changingDirectionTarget - ChangingDirectionOrigin) / (ChangingDirectionTimerMaximum);
+            }   
             // Otherwise if not, position as usual using the time factor offset
             else
             {
@@ -254,6 +255,7 @@ public class CameraBehaviour : MonoBehaviour
 
             changingDirection = true;
             changingDirectionTimer = 0;
+            changingDirectionRelativeOrigin = gameObject.transform.position.x - HorizontalPlayerPosition;
             changingDirectionTarget = playerGameObject.transform.position.x + direction * CameraLag;
 
             horizontalCameraPosition = gameObject.transform.position.x;

@@ -633,12 +633,12 @@ GameObject:
   - component: {fileID: 455917618}
   - component: {fileID: 455917617}
   m_Layer: 0
-  m_Name: Square
+  m_Name: Camera Centre Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &455917617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1881,7 +1881,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
+  - {fileID: 455917619}
   - {fileID: 286067982}
   - {fileID: 326657167}
   - {fileID: 1679195108}
-  - {fileID: 455917619}
