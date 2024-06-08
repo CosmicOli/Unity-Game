@@ -225,4 +225,4 @@ MonoBehaviour:
   MaximumHorizontalSpeedFromPower: 5
   JumpAccelerationPower: 15
   TerminalSpeed: 20
-  ContactDamage: 1
+  ContactDamageValue: 1

@@ -47,6 +47,7 @@ public class SwingBehaviour : MonoBehaviour
             // Mark the object as having been hit
             hitEnemies.Add(hitObject);
 
+            // This will be null hitting a wall, however isn't used when hitting a non-entity
             GenericEntityBehaviour hitObjectBehaviour = hitObject.GetComponent<GenericEntityBehaviour>();
 
             switch (hitObject.layer) // What type of object was hit
@@ -55,7 +56,7 @@ public class SwingBehaviour : MonoBehaviour
                     hitObjectBehaviour.TakeDamage(damage);
                     goto case 8;
 
-                case 8: // Environmental "enemies" layer, deal knockback
+                case 8: // Environmental "enemies" layer (and rolled over regular enemies), deal knockback to player
                     switch (hitObject.tag) // What type of enemy was hit
                     {
                         case "Boss": // Bosses currently don't take knockback
@@ -68,7 +69,7 @@ public class SwingBehaviour : MonoBehaviour
                             hitObjectBehaviour.TakeKnockback(enemyKnockbackStrength);
                             goto default;
 
-                        default:
+                        default: // Default is used instead of being seperate to the switch statement to catch any erronious untagged enemies
                             playerBehaviour.TakeKnockback(playerKnockbackStrength);
                             break;
                     }

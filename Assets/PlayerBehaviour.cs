@@ -270,6 +270,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
             }
         }
     }
+    
     private bool isJumping()
     {
         float currentVerticalVelocity = entityRigidBody.velocity.y;

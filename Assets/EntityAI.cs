@@ -30,7 +30,7 @@ public interface EntityAIInterface
     public void Attack(int aggroLevel, GameObject entityAggroedOn);
 }
 
-public static class EntityAI
+public static class EntityAIBehaviour
 {
     public static void ProgressAI(bool currentlyAttacking, bool ableToAttack, int aggroLevel, GameObject entityAggroedOn, Func<GameObject, int> DetermineAggroLevel, Action MoveUnaggroed, Action<int, GameObject> MoveAggroed, Action<int, GameObject> Attack)
     {
