@@ -279,8 +279,9 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         if (previousVerticalVelocity != null)
         {
             // If gravity and the current vertical acceleration match, no change in vertical acceleration has occured
+            // Note the less than; this is for if the player slows faster than gravity
             // Note the multiples by 10000 and the conversion to nullable integers; this is to round the measured gravity
-            if ((int?)((currentVerticalVelocity - previousVerticalVelocity) * 10000) == (int?)(-9.81 * gravityScale * 10000 / 50))
+            if ((int?)((currentVerticalVelocity - previousVerticalVelocity) * 10000) <= (int?)(-9.81 * gravityScale * 10000 / 50))
             {
                 previousVerticalVelocity = currentVerticalVelocity;
                 return true;
