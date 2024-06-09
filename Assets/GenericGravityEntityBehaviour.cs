@@ -7,8 +7,7 @@ public class GenericGravityEntityBehaviour : GenericHorizontalEntityBehaviour
     // These constants define jumping power and the terminal falling speed
     [SerializeField]
     protected float JumpAccelerationPower;
-    [SerializeField]
-    private float TerminalSpeed;
+    public float TerminalSpeed;
 
     // This "constant" contains a record of the gravity scale experienced by the entity
     protected float gravityScale;

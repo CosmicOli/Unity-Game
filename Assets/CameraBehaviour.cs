@@ -102,13 +102,13 @@ public class CameraBehaviour : MonoBehaviour
 
             // Track the player horizontally and assign the camera x position
             cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, playerRigidBody.velocity.x);
-            //cameraPosition.y = PlayerPosition.y;
+            cameraPosition.y = TrackObjectVertically(PlayerPosition.y, playerRigidBody.velocity.y);
 
-            // Defining the height and width of the camera
+            // Defining the height and width of the camera when orthographic
             //float CameraHeight = Camera.orthographicSize;
             //float CameraWidth = Camera.orthographicSize * Camera.aspect;
 
-            // Defining the height and width of the camera when non-othographic
+            // Defining the height and width of the camera when perspective
             // Unity links orthographic size and FOV by them being an equal viewing at z=-10 with an angle 10*size
             float CameraHeight = Mathf.Tan(Mathf.PI * Camera.fieldOfView / 360) * Mathf.Abs(gameObject.transform.position.z);
             float CameraWidth = CameraHeight * Camera.aspect;
@@ -152,27 +152,27 @@ public class CameraBehaviour : MonoBehaviour
         }
     }
 
-    private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalVelocity)
+    private float TrackObjectHorizontally(float HorizontalPlayerPosition, float HorizontalPlayerVelocity)
     {
         // Calculate the direction
-        float direction;
-        if (playerRigidBody.velocity.x > 0)
+        float horizontalDirection;
+        if (HorizontalPlayerVelocity > 0)
         {
-            direction = 1;
+            horizontalDirection = 1;
         }
-        else if (playerRigidBody.velocity.x < 0)
+        else if (HorizontalPlayerVelocity < 0)
         {
-            direction = -1;
+            horizontalDirection = -1;
         }
         else
         {
             if (previouslyFacingRight)
             {
-                direction = 1;
+                horizontalDirection = 1;
             }
             else
             {
-                direction = -1;
+                horizontalDirection = -1;
             }
         }
 
@@ -188,16 +188,16 @@ public class CameraBehaviour : MonoBehaviour
                 // I want to change speedFactor to be non linear
                 // Or I may want to return to return to 0 slower than usual
                 float speedFactor = 0;
-                if (Mathf.Abs(HorizontalVelocity) > 5)
+                if (Mathf.Abs(HorizontalPlayerVelocity) > 5)
                 {
-                    speedFactor = (HorizontalVelocity - direction * 5) / 5;
+                    speedFactor = (HorizontalPlayerVelocity - horizontalDirection * 5) / 5;
                 }
 
-                timeFactor = (direction * CameraLag + speedFactor) * horizontalVelocityTimer / HorizontalVelocityTimerMaximum;
+                timeFactor = (horizontalDirection * CameraLag + speedFactor) * horizontalVelocityTimer / HorizontalVelocityTimerMaximum;
 
-                if (Mathf.Abs(timeFactor) >= CameraLag + direction * speedFactor)
+                if (Mathf.Abs(timeFactor) >= CameraLag + horizontalDirection * speedFactor)
                 {
-                    timeFactor = Mathf.Sign(timeFactor) * (CameraLag + direction * speedFactor);
+                    timeFactor = Mathf.Sign(timeFactor) * (CameraLag + horizontalDirection * speedFactor);
                 }
             }
 
@@ -218,7 +218,7 @@ public class CameraBehaviour : MonoBehaviour
                 float ChangingDirectionOrigin = HorizontalPlayerPosition + changingDirectionRelativeOrigin;
 
                 // Going to: The player position plus the ending offset
-                changingDirectionTarget = HorizontalPlayerPosition + direction * CameraLag - timeFactor;
+                changingDirectionTarget = HorizontalPlayerPosition + horizontalDirection * CameraLag - timeFactor;
 
                 // Smoothly transition between coming from and going to
                 // Coming from origin + gradient * time
@@ -227,7 +227,7 @@ public class CameraBehaviour : MonoBehaviour
             // Otherwise if not, position as usual using the time factor offset
             else
             {
-                horizontalCameraPosition = HorizontalPlayerPosition + direction * CameraLag - timeFactor;
+                horizontalCameraPosition = HorizontalPlayerPosition + horizontalDirection * CameraLag - timeFactor;
             }
         }
         // Otherwise update which way is being faced and set the timer to the maximum
@@ -239,12 +239,39 @@ public class CameraBehaviour : MonoBehaviour
             changingDirection = true;
             changingDirectionTimer = 0;
             changingDirectionRelativeOrigin = gameObject.transform.position.x - HorizontalPlayerPosition;
-            changingDirectionTarget = playerGameObject.transform.position.x + direction * CameraLag;
+            changingDirectionTarget = playerGameObject.transform.position.x + horizontalDirection * CameraLag;
 
             horizontalCameraPosition = gameObject.transform.position.x;
         }
 
         return horizontalCameraPosition;
+    }
+
+    private float TrackObjectVertically(float VerticalPlayerPosition, float VerticalPlayerVelocity)
+    {
+        // Calculate the direction
+        float verticalDirection = 0;
+        if (VerticalPlayerVelocity > 0)
+        {
+            verticalDirection = 1;
+        }
+        else if (VerticalPlayerVelocity < 0)
+        {
+            verticalDirection = -1;
+        }
+
+        float verticalMaxSpeed = playerBehaviour.TerminalSpeed - 5;
+
+        float verticalCameraPosition;
+        float speedFactor = 0;
+        if (Mathf.Abs(VerticalPlayerVelocity) > verticalMaxSpeed)
+        {
+            speedFactor = (VerticalPlayerVelocity - verticalDirection * verticalMaxSpeed) / verticalMaxSpeed;
+        }
+
+        verticalCameraPosition = VerticalPlayerPosition + speedFactor;
+
+        return verticalCameraPosition;
     }
 
     private float CalculateHorizontalCameraBound(float BoundDirection, float CameraWidth, Vector2 CameraPosition)
