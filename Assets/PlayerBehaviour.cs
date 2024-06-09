@@ -57,7 +57,7 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
 
     // A variable that corresponds to whether the floor currently in contact
     // Used to determine whether the player can jump
-    private bool isGrounded = false;
+    public bool isGrounded = false;
 
 
     // This variable is used to determine vertical acceleration to see if any other force than gravity has been applied

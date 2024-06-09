@@ -49,6 +49,10 @@ public class CameraBehaviour : MonoBehaviour
     private bool previouslyFacingRight;
 
 
+    // This variable defines whether the player has moved since touching the ground
+    private bool hasMovedAfterTouchingTheGround;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -82,16 +86,29 @@ public class CameraBehaviour : MonoBehaviour
             {
                 horizontalVelocityTimer += Time.deltaTime;
 
+                if (playerBehaviour.isGrounded)
+                {
+                    hasMovedAfterTouchingTheGround = true;
+                }
+
                 // If the timer reaches the limit, cap it
                 if (horizontalVelocityTimer > HorizontalVelocityTimerMaximum)
                 {
                   horizontalVelocityTimer = HorizontalVelocityTimerMaximum;
                 }
             }
-            // If not currently moving horizontally, reduce the timer
+            // If not currently moving horizontally
             else
             {
-                horizontalVelocityTimer -= Time.deltaTime;
+                // If on the floor, reduce the timer
+                if (playerBehaviour.isGrounded && hasMovedAfterTouchingTheGround)
+                {
+                    horizontalVelocityTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    hasMovedAfterTouchingTheGround = false;
+                }
 
                 // If the timer reaches 0, cap it
                 if (horizontalVelocityTimer < 0)
