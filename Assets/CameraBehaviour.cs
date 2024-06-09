@@ -105,8 +105,13 @@ public class CameraBehaviour : MonoBehaviour
             //cameraPosition.y = PlayerPosition.y;
 
             // Defining the height and width of the camera
-            float CameraHeight = Camera.orthographicSize;
-            float CameraWidth = Camera.orthographicSize * 16 / 9;
+            //float CameraHeight = Camera.orthographicSize;
+            //float CameraWidth = Camera.orthographicSize * 16 / 9;
+
+            // Defining the height and width of the camera when non-othographic
+            // Unity links orthographic size and FOV by them being an equal viewing at z=-10 with an angle 10*size
+            float CameraHeight = Mathf.Tan(Mathf.PI * Camera.fieldOfView / 360) * Mathf.Abs(gameObject.transform.position.z);
+            float CameraWidth = CameraHeight * 16 / 9;
 
             // Finding the camera bounds
             topBound = CalculateVerticalCameraBound(1, CameraHeight, cameraPosition);
