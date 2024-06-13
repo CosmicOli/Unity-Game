@@ -356,6 +356,7 @@ MonoBehaviour:
   StandardContactKnockback: {x: -8, y: 8}
   currentlyAbleToInput: 1
   isFacingRight: 0
+  isGrounded: 0
   AttackBehaviour: {fileID: 326657169}
 --- !u!50 &326657164
 Rigidbody2D:

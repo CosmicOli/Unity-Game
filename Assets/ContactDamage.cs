@@ -49,7 +49,7 @@ public static class ContactDamageBehaviour
                 playerKnockback.x *= -1;
             }
 
-            playerBehaviour.TakeKnockback(playerKnockback);
+            playerBehaviour.TakeKnockback(playerKnockback, true);
 
             playerBehaviour.TakeDamage(ContactDamage);
         }

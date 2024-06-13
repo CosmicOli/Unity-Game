@@ -81,6 +81,11 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
     private Vector3 currentDirection3D;
 
 
+    // These "constants" refers to the main camera and it's behaviour
+    private Camera camera;
+    private CameraBehaviour cameraBehaviour;
+
+
     // This is a get function for MaximumHorizontalSpeedFromPower
     public float GetMaximumHorizontalSpeedFromPower()
     {
@@ -94,6 +99,9 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         base.Start();
 
         playerCollider = gameObject.GetComponent<BoxCollider2D>();
+
+        camera = GameObject.FindAnyObjectByType<Camera>();
+        cameraBehaviour = camera.GetComponent<CameraBehaviour>();
     }
 
     // Update is called once per frame
@@ -320,11 +328,21 @@ public class PlayerBehaviour : GenericGravityEntityBehaviour
         }
     }
 
-    public override void TakeKnockback(Vector3 knockback)
+    public void TakeKnockback(Vector3 Knockback, bool Delay)
     {
         if (!justHit)
         {
-            base.TakeKnockback(knockback);
+            cameraBehaviour.KnockbackCamera(Delay);
+            base.TakeKnockback(Knockback);
+        }
+    }
+
+    public override void TakeKnockback(Vector3 Knockback)
+    {
+        if (!justHit)
+        {
+            cameraBehaviour.KnockbackCamera(false);
+            base.TakeKnockback(Knockback);
         }
     }
 }

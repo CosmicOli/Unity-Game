@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class CameraBehaviour : MonoBehaviour
 {
@@ -39,6 +40,18 @@ public class CameraBehaviour : MonoBehaviour
     // This constant defines the cap of changingDirectionTimer
     // This defines how long it takes to change the camera position
     private float ChangingDirectionTimerMaximum = 0.2f;
+
+
+    // These variables define whether the player just took knockback and how long it has been since taking knockback
+    private bool justKnockedBack;
+    private float justKnockedBackTimer;
+
+    // These constants define how long of a delay there is before the camera catches up and how long it takes for the camera to catch up
+    private float JustKnockedBackDelay = 0.3f;
+    private float JustKnockedBackMaximumAfterDelay = 0.2f;
+
+    // This variable defines the start location of the camera when taking knockback
+    private Vector3 startingCameraPositionOnKnockback;
 
 
     // This variable defines whether the camera is fixed
@@ -118,8 +131,29 @@ public class CameraBehaviour : MonoBehaviour
             }
 
             // Track the player horizontally and assign the camera x position
-            cameraPosition.x = TrackObjectHorizontally(PlayerPosition.x, playerRigidBody.velocity.x);
-            cameraPosition.y = TrackObjectVertically(PlayerPosition.y, playerRigidBody.velocity.y);
+            float TargetCameraX = TrackObjectHorizontally(PlayerPosition.x, playerRigidBody.velocity.x);
+            float TargetCameraY = TrackObjectVertically(PlayerPosition.y, playerRigidBody.velocity.y);
+
+            // If just after taking knockback
+            if (justKnockedBack)
+            {
+                justKnockedBackTimer += Time.deltaTime;
+                if (justKnockedBackTimer > JustKnockedBackDelay)
+                {
+                    cameraPosition = Vector3.Lerp(startingCameraPositionOnKnockback, new Vector3(TargetCameraX, TargetCameraY, cameraPosition.z), (justKnockedBackTimer - JustKnockedBackDelay) / (JustKnockedBackMaximumAfterDelay));
+
+                    if (justKnockedBackTimer > JustKnockedBackDelay + JustKnockedBackMaximumAfterDelay)
+                    {
+                        justKnockedBack = false;
+                        justKnockedBackTimer = 0;
+                    }
+                }
+            }
+            else
+            {
+                cameraPosition.x = TargetCameraX;
+                cameraPosition.y = TargetCameraY;
+            }
 
             // Defining the height and width of the camera when orthographic
             //float CameraHeight = Camera.orthographicSize;
@@ -328,7 +362,18 @@ public class CameraBehaviour : MonoBehaviour
         return BoundDirection * Mathf.Infinity;
     }
 
-    public void FixCamera(Vector2 position)
+    public void KnockbackCamera(bool KnockbackDelay)
+    { 
+        if (!KnockbackDelay)
+        {
+            justKnockedBackTimer = JustKnockedBackDelay;
+        }
+
+        justKnockedBack = true;
+        startingCameraPositionOnKnockback = gameObject.transform.position;
+    }
+    
+    public void FixCamera(Vector3 position)
     {
         currentlyFixed = true;
 
