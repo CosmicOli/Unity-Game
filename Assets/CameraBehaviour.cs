@@ -51,7 +51,7 @@ public class CameraBehaviour : MonoBehaviour
 
     // This constant defines the cap of wallTransitionTimer
     // This defines how long it takes 
-    private float WallTransitionTimerMaximum = 1f;
+    private float WallTransitionTimerMaximum = 0.5f;
 
     // This variable defines the start location of the camera when
     private float startingHorizontalCameraOffsetOnWallTransition;
@@ -287,8 +287,6 @@ public class CameraBehaviour : MonoBehaviour
                 {
                     wallTransitioningHorizontalTimer += Time.deltaTime;
 
-                    //cameraPosition.x = Vector3.Lerp(PlayerPosition + new Vector3(startingHorizontalCameraOffsetOnWallTransition, TargetCameraY - PlayerPosition.y, cameraPosition.z), new Vector3(TargetCameraX, TargetCameraY, cameraPosition.z), wallTransitioningHorizontalTimer / WallTransitionTimerMaximum).x;
-
                     cameraPosition.x = (startingHorizontalCameraOffsetOnWallTransition) * (1 - wallTransitioningHorizontalTimer / WallTransitionTimerMaximum) + (TargetCameraX) * wallTransitioningHorizontalTimer / WallTransitionTimerMaximum;
 
                     //Debug.Log(TargetCameraX);
@@ -302,7 +300,6 @@ public class CameraBehaviour : MonoBehaviour
                     if (wallTransitioningHorizontalTimer > WallTransitionTimerMaximum)
                     {
                         wallTransitioningHorizontally = false;
-                        //wallTransitioningHorizontalTimer = 0;
                     }
                 }
                 else
@@ -312,42 +309,14 @@ public class CameraBehaviour : MonoBehaviour
 
                 if (wallTransitioningVertically)
                 {
-                    cameraPosition.y = TargetCameraY;
-
                     wallTransitioningVerticalTimer += Time.deltaTime;
 
-                    //cameraPosition = Vector3.Lerp(PlayerPosition + new Vector3(TargetCameraX - PlayerPosition.x, startingVerticalCameraOffsetOnWallTransition, cameraPosition.z), new Vector3(TargetCameraX, TargetCameraY, cameraPosition.z), wallTransitioningVerticalTimer / WallTransitionTimerMaximum);
-
-                    //cameraPosition.y = (PlayerPosition.y + startingVerticalCameraOffsetOnWallTransition) * (1 - wallTransitioningHorizontalTimer / WallTransitionTimerMaximum) + (TargetCameraY) * wallTransitioningHorizontalTimer / WallTransitionTimerMaximum;
+                    cameraPosition.y = (startingVerticalCameraOffsetOnWallTransition) * (1 - wallTransitioningVerticalTimer / WallTransitionTimerMaximum) + (TargetCameraY) * wallTransitioningVerticalTimer / WallTransitionTimerMaximum;
 
                     if (wallTransitioningVerticalTimer > WallTransitionTimerMaximum)
                     {
                         wallTransitioningVertically = false;
-                        //wallTransitioningVerticalTimer = 0;
                     }
-
-                    /*wallTransitioningHorizontalTimer += Time.deltaTime;
-
-                    // Because the starting offset isn't changing dynamically it causes problems
-                    // Need to update the axis not being Lerped
-
-                    if (wallTransitioningHorizontally)
-                    {
-                        startingCameraOffsetOnWallTransition.y = TargetCameraY - PlayerPosition.y;
-                    }
-                    // If not then the transition must be vertical
-                    else
-                    {
-                        startingCameraOffsetOnWallTransition.x = TargetCameraX - PlayerPosition.x;
-                    }
-
-                    cameraPosition = Vector3.Lerp(PlayerPosition + startingCameraOffsetOnWallTransition, new Vector3(TargetCameraX, TargetCameraY, cameraPosition.z), wallTransitionTimer / WallTransitionTimerMaximum);
-
-                    if (wallTransitionTimer > WallTransitionTimerMaximum)
-                    {
-                        wallTransitioning = false;
-                        wallTransitionTimer = 0;
-                    }*/
                 }
                 else
                 {
