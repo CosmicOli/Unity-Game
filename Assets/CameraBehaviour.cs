@@ -221,7 +221,7 @@ public class CameraBehaviour : MonoBehaviour
                     switch (i)
                     {
                         case 0:
-                            if (previousBottomBound != Mathf.NegativeInfinity)
+                            if (previousBottomBound != Mathf.Infinity)
                             {
                                 if (previousTopBound < cameraPosition.y + CameraHeight)
                                 {
@@ -287,7 +287,9 @@ public class CameraBehaviour : MonoBehaviour
                             break;
 
                         case 3:
-                            if (previousRightBound != Mathf.NegativeInfinity)
+                            HandleChangedBound();
+
+                            if (previousRightBound != Mathf.Infinity)
                             {
                                 if (previousRightBound < cameraPosition.y + CameraWidth)
                                 {
@@ -309,6 +311,29 @@ public class CameraBehaviour : MonoBehaviour
                             break;
                     }
                 }
+            }
+
+            void HandleChangedBound(ref float startingCameraOffsetOnWallTransition, ref bool wallTransitioning, ref float wallTransitioningTimer, ref float previousBound, float currentBound, float infinity, float cameraEdge, float previousCameraPositionInDirection)
+            {
+                if (previousBound != infinity)
+                {
+                    if (previousBound < cameraEdge)
+                    {
+                        wallTransitioning = true;
+                    }
+                }
+                else
+                {
+                    if (bottomBound < cameraPosition.y + CameraWidth)
+                    {
+                        wallTransitioning = true;
+                    }
+                }
+
+                previousBound = currentBound;
+
+                startingCameraOffsetOnWallTransition = previousCameraPositionInDirection;
+                wallTransitioningTimer = 0;
             }
 
             if (wallTransitioningHorizontally || wallTransitioningVertically)
