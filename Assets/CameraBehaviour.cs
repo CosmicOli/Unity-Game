@@ -197,44 +197,61 @@ public class CameraBehaviour : MonoBehaviour
             float CameraHeight = Mathf.Tan(Mathf.PI * Camera.fieldOfView / 360) * Mathf.Abs(gameObject.transform.position.z);
             float CameraWidth = CameraHeight * Camera.aspect;
 
-            // Finding the camera bounds
-            float topBound = CalculateVerticalCameraBound(1, CameraHeight, cameraPosition);
-            float bottomBound = CalculateVerticalCameraBound(-1, CameraHeight, cameraPosition);
-            float leftBound = CalculateHorizontalCameraBound(-1, CameraWidth, cameraPosition);
-            float rightBound = CalculateHorizontalCameraBound(1, CameraWidth, cameraPosition);
-
             // If the horizontal bounds are closer than the horizontal size of the camera, bound the camera
-            TargetCameraX = CalculateTargetCameraPositionFromBoundaries(leftBound, rightBound, CameraWidth, cameraPosition.x);
+            TargetCameraX = CalculateTargetCameraPositionFromBoundaries(previousLeftBound, previousRightBound, CameraWidth, cameraPosition.x);
 
             // If the vertical bounds are closer than the vertical size of the camera, bound the camera
-            TargetCameraY = CalculateTargetCameraPositionFromBoundaries(bottomBound, topBound, CameraHeight, cameraPosition.y);
+            TargetCameraY = CalculateTargetCameraPositionFromBoundaries(previousBottomBound, previousTopBound, CameraHeight, cameraPosition.y);
 
-            // Handles whether each direction's bound changes
-            HandleBoundChange(ref startingVerticalCameraOffsetOnWallTransition, ref wallTransitioningVerticalTimer, ref wallTransitioningVertically, ref previousTopBound, topBound, 1, cameraPosition.y + CameraHeight, previousCameraPosition.y);
-            HandleBoundChange(ref startingVerticalCameraOffsetOnWallTransition, ref wallTransitioningVerticalTimer, ref wallTransitioningVertically, ref previousBottomBound, bottomBound, -1, cameraPosition.y - CameraHeight, previousCameraPosition.y);
-            HandleBoundChange(ref startingHorizontalCameraOffsetOnWallTransition, ref wallTransitioningHorizontalTimer, ref wallTransitioningHorizontally, ref previousLeftBound, leftBound, -1, cameraPosition.x - CameraWidth, previousCameraPosition.x);
-            HandleBoundChange(ref startingHorizontalCameraOffsetOnWallTransition, ref wallTransitioningHorizontalTimer, ref wallTransitioningHorizontally, ref previousRightBound, rightBound, 1, cameraPosition.x + CameraWidth, previousCameraPosition.x);
-
-            // If wall transitioning horizontally
-            if (wallTransitioningHorizontally)
+            // If available to transition horizontally
+            if (playerBehaviour.isGrounded || wallTransitioningHorizontalTimer != 0)
             {
-                // Update the timer
-                wallTransitioningHorizontalTimer += Time.deltaTime;
+                // Finding the camera bounds
+                float leftBound = CalculateHorizontalCameraBound(-1, CameraWidth, cameraPosition);
+                float rightBound = CalculateHorizontalCameraBound(1, CameraWidth, cameraPosition);
 
-                // Smooth the camera x position
-                cameraPosition.x = (startingHorizontalCameraOffsetOnWallTransition) * (1 - wallTransitioningHorizontalTimer / WallTransitionTimerMaximum) + (TargetCameraX) * wallTransitioningHorizontalTimer / WallTransitionTimerMaximum;
-
-                // If at the timer maximum, no longer wall transition horizontally
-                if (wallTransitioningHorizontalTimer > WallTransitionTimerMaximum)
+                // If the player is on the floor, handle whether each direction's bounds change
+                if (playerBehaviour.isGrounded)
                 {
-                    wallTransitioningHorizontally = false;
+                    HandleBoundChange(ref startingHorizontalCameraOffsetOnWallTransition, ref wallTransitioningHorizontally, ref previousLeftBound, ref wallTransitioningHorizontalTimer, leftBound, -1, cameraPosition.x - CameraWidth, previousCameraPosition.x);
+                    HandleBoundChange(ref startingHorizontalCameraOffsetOnWallTransition, ref wallTransitioningHorizontally, ref previousRightBound, ref wallTransitioningHorizontalTimer, rightBound, 1, cameraPosition.x + CameraWidth, previousCameraPosition.x);
+                }
+
+                // If wall transitioning horizontally
+                if (wallTransitioningHorizontally)
+                {
+                    // Update the timer
+                    wallTransitioningHorizontalTimer += Time.deltaTime;
+
+                    // Smooth the camera x position
+                    cameraPosition.x = (startingHorizontalCameraOffsetOnWallTransition) * (1 - wallTransitioningHorizontalTimer / WallTransitionTimerMaximum) + (TargetCameraX) * wallTransitioningHorizontalTimer / WallTransitionTimerMaximum;
+
+                    // If at the timer maximum, no longer wall transition horizontally
+                    if (wallTransitioningHorizontalTimer > WallTransitionTimerMaximum)
+                    {
+                        wallTransitioningHorizontally = false;
+                        wallTransitioningHorizontalTimer = 0;
+                    }
+                }
+                else
+                {
+                    // Place the camera x position at the target x position
+                    cameraPosition.x = TargetCameraX;
                 }
             }
+            // If not available to transition, keep the camera on target
             else
             {
                 // Place the camera x position at the target x position
                 cameraPosition.x = TargetCameraX;
             }
+
+            // Finding the camera bounds
+            float topBound = CalculateVerticalCameraBound(1, CameraHeight, cameraPosition);
+            float bottomBound = CalculateVerticalCameraBound(-1, CameraHeight, cameraPosition);
+
+            HandleBoundChange(ref startingVerticalCameraOffsetOnWallTransition, ref wallTransitioningVertically, ref previousTopBound, ref wallTransitioningVerticalTimer, topBound, 1, cameraPosition.y + CameraHeight, previousCameraPosition.y);
+            HandleBoundChange(ref startingVerticalCameraOffsetOnWallTransition, ref wallTransitioningVertically, ref previousBottomBound, ref wallTransitioningVerticalTimer, bottomBound, -1, cameraPosition.y - CameraHeight, previousCameraPosition.y);
 
             // If wall transitioning vertically
             if (wallTransitioningVertically)
@@ -249,6 +266,7 @@ public class CameraBehaviour : MonoBehaviour
                 if (wallTransitioningVerticalTimer > WallTransitionTimerMaximum)
                 {
                     wallTransitioningVertically = false;
+                    wallTransitioningVerticalTimer = 0;
                 }
             }
             else
@@ -259,6 +277,39 @@ public class CameraBehaviour : MonoBehaviour
 
             // Reassign the camera position to be the newly calculated position
             gameObject.transform.position = cameraPosition;
+        }
+    }
+
+    private void HandleBoundChange(ref float startingCameraOffsetOnWallTransition, ref bool wallTransitioning, ref float previousBound, ref float wallTransitioningTimer, float currentBound, float directionInAxis, float cameraEdge, float previousCameraPositionInAxis)
+    {
+        // If the bound has changed
+        if (previousBound != currentBound)
+        {
+            // If the previous bound isn't infinity
+            if (previousBound != directionInAxis * Mathf.Infinity)
+            {
+                // Only transition when the previous bound is withing frame
+                // This accounts for whether the player is moving away from a wall, as it shouldn't transition then
+                if (directionInAxis * previousBound < directionInAxis * cameraEdge)
+                {
+                    wallTransitioning = true;
+                }
+            }
+            // If the previous bound is infinity
+            else
+            {
+                // Only transition when the current bound is within frame
+                // This accounts for whether the player is moving towards a wall, as it shouldn't transition then
+                if (directionInAxis * currentBound < directionInAxis * cameraEdge)
+                {
+                    wallTransitioning = true;
+                }
+            }
+
+            previousBound = currentBound;
+
+            wallTransitioningTimer = 0; // This is done despite resetting at the end of the timer in case the timer is cut halfway
+            startingCameraOffsetOnWallTransition = previousCameraPositionInAxis;
         }
     }
 
@@ -349,39 +400,6 @@ public class CameraBehaviour : MonoBehaviour
         }
 
         return horizontalCameraPosition;
-    }
-
-    private void HandleBoundChange(ref float startingCameraOffsetOnWallTransition, ref float wallTransitioningTimer, ref bool wallTransitioning, ref float previousBound, float currentBound, float directionInAxis, float cameraEdge, float previousCameraPositionInAxis)
-    {
-        // If the bound has changed
-        if (previousBound != currentBound)
-        {
-            // If the previous bound isn't infinity
-            if (previousBound != directionInAxis * Mathf.Infinity)
-            {
-                // Only transition when the previous bound is withing frame
-                // This accounts for whether the player is moving away from a wall, as it shouldn't transition then
-                if (directionInAxis * previousBound < directionInAxis * cameraEdge)
-                {
-                    wallTransitioning = true;
-                }
-            }
-            // If the previous bound is infinity
-            else
-            {
-                // Only transition when the current bound is within frame
-                // This accounts for whether the player is moving towards a wall, as it shouldn't transition then
-                if (directionInAxis * currentBound < directionInAxis * cameraEdge)
-                {
-                    wallTransitioning = true;
-                }
-            }
-
-            previousBound = currentBound;
-
-            startingCameraOffsetOnWallTransition = previousCameraPositionInAxis;
-            wallTransitioningTimer = 0;
-        }
     }
 
     private float TrackObjectVertically(float VerticalPlayerPosition, float VerticalPlayerVelocity)
