@@ -80,6 +80,10 @@ public class CameraBehaviour : MonoBehaviour
     // This variable defines whether the player has moved since touching the ground
     private bool hasMovedAfterTouchingTheGround;
 
+    // These variables define the vertical resting position of the player and the offset from the resting position the player has to travel before pulling the camera along
+    private float verticalRestingPosition;
+    private float VerticalRestingOffsetBeforeFollow = 1f;
+
 
     // These variables store the previous bounds
     float previousTopBound;
@@ -417,14 +421,37 @@ public class CameraBehaviour : MonoBehaviour
 
         float verticalMaxSpeed = playerBehaviour.TerminalSpeed - 5;
 
-        float verticalCameraPosition;
+        float verticalCameraPosition = gameObject.transform.position.y;
+        float targetVerticalCameraPosition;
+
         float speedFactor = 0;
         if (Mathf.Abs(VerticalPlayerVelocity) > verticalMaxSpeed)
         {
             speedFactor = (VerticalPlayerVelocity - verticalDirection * verticalMaxSpeed) / verticalMaxSpeed;
         }
 
-        verticalCameraPosition = VerticalPlayerPosition + speedFactor;
+        // Set the target based on player position and speed
+        targetVerticalCameraPosition = VerticalPlayerPosition + speedFactor;
+
+        // If not moving vertically and within the resting position bounds, reset the resting position to be centred on the player
+        if (VerticalPlayerVelocity == 0 && Mathf.Abs(VerticalPlayerPosition - verticalRestingPosition) < VerticalRestingOffsetBeforeFollow)
+        {
+            verticalCameraPosition = verticalCameraPosition + (VerticalPlayerPosition - verticalCameraPosition) * 5f * Time.deltaTime;
+            verticalRestingPosition = verticalCameraPosition;
+        }
+        // If outside the bounds of the dead zone, pull the camera towards the player
+        else if (Mathf.Abs(VerticalPlayerPosition - verticalRestingPosition) > VerticalRestingOffsetBeforeFollow)
+        {
+            verticalCameraPosition = verticalCameraPosition + (targetVerticalCameraPosition - verticalCameraPosition) * 3f * Time.deltaTime;
+            verticalRestingPosition = verticalCameraPosition;
+        }
+
+        // If going down and have caught up with the player, lock the camera to the target position
+        if (verticalCameraPosition >= targetVerticalCameraPosition)
+        {
+            verticalCameraPosition = targetVerticalCameraPosition;
+            verticalRestingPosition = verticalCameraPosition;
+        }
 
         return verticalCameraPosition;
     }
